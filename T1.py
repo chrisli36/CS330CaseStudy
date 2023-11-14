@@ -38,19 +38,26 @@ class Graph:
         distances = {vertex: float('infinity') for vertex in self.vertices}
         distances[start_vertex_id] = 0
         pq = [(0, start_vertex_id)]
+        visited = set()
 
         while pq:
             current_distance, current_vertex = heapq.heappop(pq)
+            visited.add(current_vertex)
 
             if current_vertex == end_vertex_id:
                 return distances[end_vertex_id]
 
             for neighbor, edge in self.edges.get(current_vertex, {}).items():
-                time = edge.length / edge.speeds[day_type][hour]
-                distance = current_distance + time
-                if distance < distances[neighbor]:
-                    distances[neighbor] = distance
-                    heapq.heappush(pq, (distance, neighbor))
+                if neighbor not in visited:
+                    time = edge.length / edge.speeds[day_type][hour]
+                    
+                    # does not stop QAQ
+                    print(f"From {current_vertex} to {neighbor}, time: {time}")
+                    
+                    distance = current_distance + time
+                    if distance < distances[neighbor]:
+                        distances[neighbor] = distance
+                        heapq.heappush(pq, (distance, neighbor))
 
         return float('infinity')
     
@@ -70,7 +77,7 @@ class Graph:
             if distance < min_distance:
                 min_distance = distance
                 closest_vertex = vertex_id
-        return closest_vertex
+        return int(closest_vertex) #vertex id of closest vertex
 
 # Preprocessing
 def processNodes(fileName):
@@ -78,7 +85,7 @@ def processNodes(fileName):
         node_data = json.load(file)
     vertices = []
     for node_id, coords in node_data.items():
-        vertex = Vertex(node_id, coords['lat'], coords['lon'])
+        vertex = Vertex(int(node_id), float(coords['lat']), float(coords['lon']))
         vertices.append(vertex)
     return vertices
 
@@ -94,6 +101,10 @@ def processEdges(fileName):
                 'weekend': {hour: float(row[27 + hour]) for hour in range(24)}
             }
             edge = Edge(source, dest, length, speeds)
+            
+            #This seems fine
+            #print(f"Edge from {source} to {dest}, length: {length}, speeds: {speeds}")
+            
             edges.append(edge)
     return edges
 
@@ -154,6 +165,8 @@ def baseline_algorithm(graph, drivers, passengers):
             time_to_pickup = graph.dijkstra(d_vertex, p_vertex, day_type, hour)
             time_to_dropoff = graph.dijkstra(p_vertex, dropoff_vertex, day_type, hour)
             
+            #print(time_to_dropoff)
+            #print(time_to_pickup)
 
             if time_to_pickup < min_distance:
                 min_distance = time_to_pickup
@@ -189,6 +202,9 @@ def baseline_algorithm(graph, drivers, passengers):
 def main():
     vertices = processNodes('node_data.json')
     edges = processEdges('edges.csv')
+    #vertices = processNodes('test_node.json')
+    #edges = processEdges('test_edges.csv')
+    
     drivers = processDrivers('drivers.csv')
     passengers = processPassengers('passengers.csv')
 
