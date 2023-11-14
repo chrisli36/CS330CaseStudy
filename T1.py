@@ -77,6 +77,7 @@ class Graph:
             if distance < min_distance:
                 min_distance = distance
                 closest_vertex = vertex_id
+        print(closest_vertex)
         return int(closest_vertex) #vertex id of closest vertex
 
 # Preprocessing
@@ -200,13 +201,15 @@ def baseline_algorithm(graph, drivers, passengers):
 
 
 def main():
-    vertices = processNodes('node_data.json')
-    edges = processEdges('edges.csv')
-    #vertices = processNodes('test_node.json')
-    #edges = processEdges('test_edges.csv')
+    #vertices = processNodes('node_data.json')
+    #edges = processEdges('edges.csv')
+    vertices = processNodes('test_node.json')
+    edges = processEdges('test_edges.csv')
     
-    drivers = processDrivers('drivers.csv')
-    passengers = processPassengers('passengers.csv')
+    #drivers = processDrivers('drivers.csv')
+    #passengers = processPassengers('passengers.csv')
+    drivers = processDrivers('test_drivers.csv')
+    passengers = processPassengers('test_passengers.csv')
 
     graph = Graph()
     for vertex in vertices:
