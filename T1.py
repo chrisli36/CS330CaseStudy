@@ -57,7 +57,7 @@ class Graph:
         
         return int(closest_vertex) #vertex id of closest vertex
     
-    """    
+     
     def getWeight(self, source_id, destination_id, day_type, hour):
         edge = self.edges.get(source_id,{}).get(destination_id)
         if edge:
@@ -67,9 +67,9 @@ class Graph:
                 return edge.length / speed
         print(f"No valid edge or zero speed from {source_id} to {destination_id}")
         return float('infinity')
-    """
+    
 
-    """
+    
     def dijkstra(self, start_vertex_id, end_vertex_id, day_type, hour):
         distances = {vertex: float('infinity') for vertex in self.vertices}
         distances[start_vertex_id] = 0
@@ -100,40 +100,16 @@ class Graph:
 
         print(f"End vertex not reached: {end_vertex_id}, returning infinity")
         return float('infinity')
+    
+
     """
-    from collections import deque
-
-    class Graph:
-        # existing implementation of your Graph class
-
-        def bfs(self, start_vertex_id, end_vertex_id):
-            visited = set()
-            queue = deque([start_vertex_id])
-
-            while queue:
-                vertex = queue.popleft()
-                if vertex == end_vertex_id:
-                    return True  # Path found
-
-                visited.add(vertex)
-
-                for neighbor in self.edges.get(vertex, {}):
-                    if neighbor not in visited:
-                        queue.append(neighbor)
-
-            return False  # No path found
-
-
-
-
     def dijkstra(self, start_vertex_id, end_vertex_id, day_type, hour):
         distances = {vertex: float('infinity') for vertex in self.vertices}
         distances[start_vertex_id] = 0
         pq = [(0, start_vertex_id)]
         visited = set()
         
-        iteration_counter = 0
-        while pq and iteration_counter < 100:
+        while pq:
             current_distance, current_vertex = heapq.heappop(pq)
 
             if current_vertex in visited:
@@ -158,10 +134,9 @@ class Graph:
                     distances[neighbor] = new_distance
                     heapq.heappush(pq, (new_distance, neighbor))
             
-            iteration_counter += 1
             
         return float('infinity')
-
+    """
 
 
 # Preprocessing
@@ -301,17 +276,9 @@ def main():
     for edge in edges:
         graph.addEdge(edge) 
         
-        
-    # Usage:
-    # Assuming you have an instance of Graph named 'graph'
-    start_vertex_id = 1  # Replace with your actual start vertex ID
-    end_vertex_id = 100  # Replace with your actual end vertex ID
-    path_exists = graph.bfs(start_vertex_id, end_vertex_id)
-    print("Path exists:" if path_exists else "No path found")
-    
     start = timeit.default_timer()
     print("The start time is:", start)
-    #baseline_algorithm(graph, drivers, passengers)
+    baseline_algorithm(graph, drivers, passengers)
     print("The difference ", 
           timeit.default_timer() - start)
 
