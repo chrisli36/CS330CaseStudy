@@ -51,7 +51,7 @@ class Graph:
                 min_distance = distance
                 closest_vertex = vertex_id
         
-        print('closest vertex', closest_vertex)
+        #print('closest vertex', closest_vertex)
         
         return int(closest_vertex) #vertex id of closest vertex
     
@@ -72,32 +72,23 @@ class Graph:
         visited = set()
 
         while pq:
-            #initialize
             current_distance, current_vertex = heapq.heappop(pq)
             visited.add(current_vertex)
             #print(f"Current Vertex: {current_vertex}, Distance: {current_distance}")
-            
-            # return distance if currenct vertex is destination
+
             if current_vertex == end_vertex_id:
-                print(f"End vertex reached: {end_vertex_id}, Distance: {distances[end_vertex_id]}")
                 return distances[end_vertex_id]
-
-            # else skip vertex if it is visited
-            if current_vertex in visited:
-                continue
-            
-            # else check and update distance 
+                        
             for neighbor in self.edges.get(current_vertex, {}):
-                edge = self.edges[current_vertex][neighbor]
-                weight = self.getWeight(current_vertex, neighbor, day_type, hour)
-                #print(f"Neighbor: {neighbor}, Weight: {weight}")
-                new_distance = current_distance + weight
-                #print(f"New Distance to {neighbor}: {new_distance}")
+                if neighbor not in visited:
+                    weight = self.getWeight(current_vertex, neighbor, day_type, hour)
+                    new_distance = current_distance + weight
+                    #print(f"New Distance to {neighbor}: {new_distance}")
 
-                if new_distance < distances[neighbor]:
-                    #print(f"Updating {neighbor} in PQ")
-                    distances[neighbor] = new_distance
-                    heapq.heappush(pq, (new_distance, neighbor))
+                    if new_distance < distances.get(neighbor, float('infinity')):
+                        #print(f"Updating {neighbor} in PQ")
+                        distances[neighbor] = new_distance
+                        heapq.heappush(pq, (new_distance, neighbor))
 
         print(f"End vertex not reached: {end_vertex_id}, returning infinity")
         return distances.get(end_vertex_id, float('infinity'))
@@ -237,9 +228,8 @@ def main():
     for vertex in vertices:
         graph.addVertex(vertex)
     for edge in edges:
-        graph.addEdge(edge)
-        
-        
+        graph.addEdge(edge) 
+    
     start = timeit.default_timer()
     print("The start time is:", start)
     baseline_algorithm(graph, drivers, passengers)
@@ -248,3 +238,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+    
+    
+    
+    
+   

@@ -64,3 +64,41 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
+"""
+def verify_graph_construction(vertices, edges):
+    graph = Graph()
+
+    # Add vertices to the graph
+    for vertex in vertices:
+        graph.addVertex(vertex)
+
+    # Add edges to the graph
+    for edge in edges:
+        graph.addEdge(edge)
+
+    # Check if all vertices are in the graph
+    for vertex in vertices:
+        if vertex.id not in graph.vertices:
+            print(f"Vertex {vertex.id} is missing in the graph.")
+            return False
+
+    # Check if all edges are in the graph and have correct weights
+    for edge in edges:
+        if edge.source not in graph.edges or edge.destination not in graph.edges[edge.source]:
+            print(f"Edge from {edge.source} to {edge.destination} is missing in the graph.")
+            return False
+
+        # Check if the weight calculation is correct
+        weight = graph.getWeight(edge.source, edge.destination, 'weekend', 22) 
+        if weight == float('infinity') or weight <= 0:
+            print(f"Edge from {edge.source} to {edge.destination} has invalid weight: {weight}")
+            return False
+
+    print("Graph construction is correct.")
+    return True
+"""
