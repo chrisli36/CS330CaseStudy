@@ -33,33 +33,6 @@ class Graph:
         if edge.source not in self.edges:
             self.edges[edge.source] = {}
         self.edges[edge.source][edge.destination] = edge
-        
-    def dijkstra(self, start_vertex_id, end_vertex_id, day_type, hour):
-        distances = {vertex: float('infinity') for vertex in self.vertices}
-        distances[start_vertex_id] = 0
-        pq = [(0, start_vertex_id)]
-        visited = set()
-
-        while pq:
-            current_distance, current_vertex = heapq.heappop(pq)
-            visited.add(current_vertex)
-
-            if current_vertex == end_vertex_id:
-                return distances[end_vertex_id]
-
-            for neighbor, edge in self.edges.get(current_vertex, {}).items():
-                if neighbor not in visited:
-                    time = edge.length / edge.speeds[day_type][hour]
-                    
-                    # does not stop QAQ
-                    print(f"From {current_vertex} to {neighbor}, time: {time}")
-                    
-                    distance = current_distance + time
-                    if distance < distances[neighbor]:
-                        distances[neighbor] = distance
-                        heapq.heappush(pq, (distance, neighbor))
-
-        return float('infinity')
     
     def haversine(self, lat1, lon1, lat2, lon2): # to calculate closestVertex
         R = 3959.87433   
@@ -77,8 +50,57 @@ class Graph:
             if distance < min_distance:
                 min_distance = distance
                 closest_vertex = vertex_id
-        print(closest_vertex)
+        
+        print('closest vertex', closest_vertex)
+        
         return int(closest_vertex) #vertex id of closest vertex
+    
+    def getWeight(self, source_id, destination_id, day_type, hour):
+        edge = self.edges.get(source_id,{}).get(destination_id)
+        if edge:
+            speed = edge.speeds[day_type][hour]
+            print(f"Edge from {source_id} to {destination_id}, Speed: {speed}, Length: {edge.length}")
+            if speed > 0:
+                return edge.length / speed
+        print(f"No valid edge or zero speed from {source_id} to {destination_id}")
+        return float('infinity')
+
+    def dijkstra(self, start_vertex_id, end_vertex_id, day_type, hour):
+        distances = {vertex: float('infinity') for vertex in self.vertices}
+        distances[start_vertex_id] = 0
+        pq = [(0, start_vertex_id)]
+        visited = set()
+
+        while pq:
+            #initialize
+            current_distance, current_vertex = heapq.heappop(pq)
+            visited.add(current_vertex)
+            #print(f"Current Vertex: {current_vertex}, Distance: {current_distance}")
+            
+            # return distance if currenct vertex is destination
+            if current_vertex == end_vertex_id:
+                print(f"End vertex reached: {end_vertex_id}, Distance: {distances[end_vertex_id]}")
+                return distances[end_vertex_id]
+
+            # else skip vertex if it is visited
+            if current_vertex in visited:
+                continue
+            
+            # else check and update distance 
+            for neighbor in self.edges.get(current_vertex, {}):
+                edge = self.edges[current_vertex][neighbor]
+                weight = self.getWeight(current_vertex, neighbor, day_type, hour)
+                #print(f"Neighbor: {neighbor}, Weight: {weight}")
+                new_distance = current_distance + weight
+                #print(f"New Distance to {neighbor}: {new_distance}")
+
+                if new_distance < distances[neighbor]:
+                    #print(f"Updating {neighbor} in PQ")
+                    distances[neighbor] = new_distance
+                    heapq.heappush(pq, (new_distance, neighbor))
+
+        print(f"End vertex not reached: {end_vertex_id}, returning infinity")
+        return distances.get(end_vertex_id, float('infinity'))
 
 # Preprocessing
 def processNodes(fileName):
@@ -195,21 +217,21 @@ def baseline_algorithm(graph, drivers, passengers):
     total_passenger_wait_time /= 60  # Convert to minutes
     total_driver_active_time /= 60   # Convert to minutes
 
-    print("Total Passenger Wait Time (D1):", total_passenger_wait_time, "minutes")
-    print("Total Driver Active Time (D2):", total_driver_active_time, "minutes")
+    #print("Total Passenger Wait Time (D1):", total_passenger_wait_time, "minutes")
+    #print("Total Driver Active Time (D2):", total_driver_active_time, "minutes")
 
 
 
 def main():
-    #vertices = processNodes('node_data.json')
-    #edges = processEdges('edges.csv')
-    vertices = processNodes('test_node.json')
-    edges = processEdges('test_edges.csv')
+    vertices = processNodes('node_data.json')
+    edges = processEdges('edges.csv')
+    #vertices = processNodes('testdataset/test_node.json')
+    #edges = processEdges('testdataset/test_edges.csv')
     
-    #drivers = processDrivers('drivers.csv')
-    #passengers = processPassengers('passengers.csv')
-    drivers = processDrivers('test_drivers.csv')
-    passengers = processPassengers('test_passengers.csv')
+    drivers = processDrivers('drivers.csv')
+    passengers = processPassengers('passengers.csv')
+    #drivers = processDrivers('testdataset/test_drivers.csv')
+    #passengers = processPassengers('testdataset/test_passengers.csv')
 
     graph = Graph()
     for vertex in vertices:

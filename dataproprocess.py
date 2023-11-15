@@ -1,20 +1,66 @@
-import csv
-from datetime import datetime 
+import json
 
-def processPassengers(fileName):
-    passengers = []
-    with open(fileName, newline='') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            passengers.append({
-                'datetime': datetime.strptime(row['Date/Time'], '%m/%d/%Y %H:%M:%S'),
-                'source_lat': float(row['Source Lat']),
-                'source_lon': float(row['Source Lon']),
-                'dest_lat': float(row['Dest Lat']),
-                'dest_lon': float(row['Dest Lon'])
-            })
-    return passengers
+#attempt to use adjacency-1 doesnt work
+
+# Vertex Class
+class Vertex:
+    def __init__(self, node_id, latitude, longitude):
+        self.id = node_id
+        self.latitude = latitude
+        self.longitude = longitude
+
+# Edge Class
+class Edge:
+    def __init__(self, start, end, attributes):
+        self.start = start
+        self.end = end
+        self.attributes = attributes
+
+# Graph Class
+class Graph:
+    def __init__(self):
+        self.vertices = {}
+        self.edges = {}
+
+    def addVertex(self, vertex):
+        self.vertices[vertex.id] = vertex
+
+    def addEdge(self, edge):
+        if edge.start not in self.edges:
+            self.edges[edge.start] = {}
+        self.edges[edge.start][edge.end] = edge.attributes
+
+# Preprocessing Functions
+def processNodes(fileName):
+    with open(fileName, 'r') as file:
+        node_data = json.load(file)
+
+    graph = Graph()
+    for node_id, coords in node_data.items():
+        vertex = Vertex(int(node_id), float(coords['lat']), float(coords['lon']))
+        graph.addVertex(vertex)
+    return graph
+
+def processEdges(fileName, graph):
+    with open(fileName, 'r') as file:
+        adjacency_data = json.load(file)
+
+    for start_node, connections in adjacency_data.items():
+        for end_node, attributes in connections.items():
+            edge = Edge(int(start_node), int(end_node), attributes)
+            graph.addEdge(edge)
+
+# Main Function
+def main():
+    graph = processNodes('node_data.json')
+    processEdges('adjacency-1.json', graph)
+    
+    print(graph)
+    print(processEdges('adjacency.json', graph))
 
 
+    # The graph is now populated with vertices and edges
+    # You can add additional functionality as required
 
-print(processPassengers('passengers.csv')[1])
+if __name__ == "__main__":
+    main()
