@@ -40,8 +40,7 @@ class Graph:
         #print('closest vertex', closest_vertex)
         
         return int(closest_vertex) #vertex id of closest vertex
-    
-    """    
+       
     def getWeight(self, source_id, destination_id, day_type, hour):
         edge = self.edges.get(source_id,{}).get(destination_id)
         if edge:
@@ -51,9 +50,8 @@ class Graph:
                 return edge.length / speed
         print(f"No valid edge or zero speed from {source_id} to {destination_id}")
         return float('infinity')
-    """
 
-    """
+
     def dijkstra(self, start_vertex_id, end_vertex_id, day_type, hour):
         distances = {vertex: float('infinity') for vertex in self.vertices}
         distances[start_vertex_id] = 0
@@ -83,41 +81,4 @@ class Graph:
                         heapq.heappush(pq, (new_distance, neighbor))
 
         print(f"End vertex not reached: {end_vertex_id}, returning infinity")
-        return float('infinity')
-    """
-
-    def dijkstra(self, start_vertex_id, end_vertex_id, day_type, hour):
-        distances = {vertex: float('infinity') for vertex in self.vertices}
-        distances[start_vertex_id] = 0
-        pq = [(0, start_vertex_id)]
-        visited = set()
-        
-        iteration_counter = 0
-        while pq and iteration_counter < 100:
-            current_distance, current_vertex = heapq.heappop(pq)
-
-            if current_vertex in visited:
-                continue
-            visited.add(current_vertex)
-
-            if current_vertex == end_vertex_id:
-                return distances[end_vertex_id]
-
-            for neighbor in self.edges.get(current_vertex, {}):
-                if neighbor in visited:
-                    continue
-                
-                edge = self.edges[current_vertex][neighbor]
-                
-                speed = edge.speeds[day_type][hour]
-                weight = edge.length / speed
-                
-                new_distance = current_distance + weight
-                
-                if new_distance < distances[neighbor]:
-                    distances[neighbor] = new_distance
-                    heapq.heappush(pq, (new_distance, neighbor))
-            
-            iteration_counter += 1
-            
         return float('infinity')
