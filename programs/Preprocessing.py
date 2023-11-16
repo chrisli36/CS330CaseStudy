@@ -4,6 +4,7 @@ from datetime import datetime
 from Vertex import Vertex
 from Edge import Edge
 from Driver import Driver
+from Passenger import Passenger
 
 class Preprocessing:
     def processNodes(self, fileName):
@@ -40,38 +41,32 @@ class Preprocessing:
 
 
     def processDrivers(self, fileName):
-        '''Returns a list of drivers where each driver is a dictionary {datetime, latitutde, longitude}'''
+        '''Returns a list of driver objects'''
 
         drivers = []
         with open(fileName, newline='') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                
-                driver = Driver()
-
-                drivers.append({
-                    'datetime': datetime.strptime(row['Date/Time'], "%m/%d/%Y %H:%M:%S"),
-                    'latitude': float(row['Source Lat']),
-                    'longitude': float(row['Source Lon'])
-                })
+                dt = datetime.strptime(row['Date/Time'], "%m/%d/%Y %H:%M:%S")
+                lat = float(row['Source Lat']); lon = float(row['Source Lon'])
+                driver = Driver(dt, lat, lon)
+                drivers.append(driver)
 
         print("Processed drivers!")
         return drivers
 
     def processPassengers(self, fileName):
-        '''Returns a list of passengers where each passenger is a dictionary {datetime, source_lat, source_lon, dest_lat, dest_lon}'''
+        '''Returns a list of passenger objects'''
 
         passengers = []
         with open(fileName, newline='') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                passengers.append({
-                    'datetime': datetime.strptime(row['Date/Time'], "%m/%d/%Y %H:%M:%S"),
-                    'source_lat': float(row['Source Lat']),
-                    'source_lon': float(row['Source Lon']),
-                    'dest_lat': float(row['Dest Lat']),
-                    'dest_lon': float(row['Dest Lon'])
-                })
+                dt = datetime.strptime(row['Date/Time'], "%m/%d/%Y %H:%M:%S")
+                slat = float(row['Source Lat']); slon = float(row['Source Lon'])
+                dlat = float(row['Dest Lat']); dlon = float(row['Dest Lon'])
+                passenger = Passenger(dt, slat, slon, dlat, dlon)
+                passengers.append(passenger)
 
         print("Processed passengers!")
         return passengers

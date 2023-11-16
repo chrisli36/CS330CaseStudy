@@ -1,7 +1,6 @@
 import heapq
 import math
 from datetime import datetime, timedelta
-import timeit
 from collections import deque
 
 # Whenever riders join the queue, they'll have a waiting time that starts ticking up. 
