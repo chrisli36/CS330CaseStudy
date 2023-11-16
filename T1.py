@@ -45,7 +45,7 @@ class T1:
         # loop until all passengers are served or no driver available
         while waiting_passengers and drivers:
             passenger = waiting_passengers.popleft()
-            p_vertex = graph.closestVertex(passenger['source_lat'], passenger['source_lom'])
+            p_vertex = graph.closestVertex(passenger['source_lat'], passenger['source_lon'])
             dropoff_vertex = graph.closestVertex(passenger['dest_lat'], passenger['dest_lon'])
 
             nearest_driver = None
