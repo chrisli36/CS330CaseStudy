@@ -3,6 +3,7 @@ import csv
 from datetime import datetime
 from Vertex import Vertex
 from Edge import Edge
+from Driver import Driver
 
 class Preprocessing:
     def processNodes(self, fileName):
@@ -45,6 +46,9 @@ class Preprocessing:
         with open(fileName, newline='') as file:
             reader = csv.DictReader(file)
             for row in reader:
+                
+                driver = Driver()
+
                 drivers.append({
                     'datetime': datetime.strptime(row['Date/Time'], "%m/%d/%Y %H:%M:%S"),
                     'latitude': float(row['Source Lat']),

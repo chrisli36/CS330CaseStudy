@@ -21,10 +21,13 @@ def main():
     
     start = timeit.default_timer()
     print("The start time is:", start)
-    algorithm = T1()
-    algorithm.baseline_algorithm(graph, drivers, passengers)
-    print("The difference ", 
-          timeit.default_timer() - start)
+
+    print(drivers[0:10])
+    print(passengers[0:10])
+
+    # algorithm = T1()
+    # algorithm.baseline_algorithm(graph, drivers, passengers)
+    print("Time taken: ", timeit.default_timer() - start)
 
 if __name__ == "__main__":
     main()
