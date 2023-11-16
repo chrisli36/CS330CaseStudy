@@ -50,11 +50,11 @@ class Graph:
             if speed > 0:
                 return edge.length / speed
         print(f"No valid edge or zero speed from {source_id} to {destination_id}")
-        return float('infinity')
+        return float('inf')
 
 
     def dijkstra(self, start_vertex_id, end_vertex_id, day_type, hour):
-        distances = {vertex: float('infinity') for vertex in self.vertices}
+        distances = {vertex: float('inf') for vertex in self.vertices}
         distances[start_vertex_id] = 0
         pq = [(0, start_vertex_id)]
         visited = set()
@@ -65,7 +65,7 @@ class Graph:
                 continue
             visited.add(current_vertex)
                         
-            for neighbor in self.edges.get(current_vertex, {}):
+            for neighbor in self.adjacency[current_vertex]:
                 if neighbor not in visited:
                     weight = self.getWeight(current_vertex, neighbor, day_type, hour)
                     new_distance = current_distance + weight
@@ -83,4 +83,4 @@ class Graph:
                             return distances[end_vertex_id]
 
         print(f"End vertex not reached: {end_vertex_id}, returning infinity")
-        return float('infinity')
+        return float('inf')
