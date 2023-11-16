@@ -26,7 +26,23 @@ trip time calculation
 
 # T1
 class T1:
-    def baseline_algorithm(self, graph, drivers, passengers):
+    def runT1v2(self, graph, drivers, passengers):
+
+        # passenger queue
+        passengers = deque(passengers)
+
+        # driver priority queue sorted by the next time they will be active
+        STARTTIME = drivers[0].datetime
+        activeDrivers = []
+        for driver in drivers:
+            wrapper = ((driver.datetime - STARTTIME).total_seconds(), driver)
+            activeDrivers.append(wrapper)
+        
+        while passengers:
+            pass
+
+
+    def runT1(self, graph, drivers, passengers):
         # give id to driver to distinguish driver
         for i, driver in enumerate(drivers):
             driver['id'] = i
