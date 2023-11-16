@@ -4,13 +4,15 @@ import heapq
 import math
 from datetime import datetime, timedelta
 import timeit
-from collections import deque
+from collections import defaultdict
 
 # Graph Class
 class Graph:
     def __init__(self):
         self.vertices = {}
         self.edges = {}
+
+        self.adjacency = defaultdict(list)
 
     def addVertex(self, vertex):
         self.vertices[vertex.id] = vertex
@@ -19,8 +21,11 @@ class Graph:
         if edge.source not in self.edges:
             self.edges[edge.source] = {}
         self.edges[edge.source][edge.destination] = edge
+
+        self.adjacency[edge.source].append(edge.destination)
+        self.adjacency[edge.destination].append(edge.source)
     
-    def haversine(self, lat1, lon1, lat2, lon2): # to calculate closestVertex
+    def getDistance(self, lat1, lon1, lat2, lon2): # to calculate closestVertex
         R = 3959.87433   
         dLat = math.radians(lat2 - lat1)
         dLon = math.radians(lon2 - lon1)
@@ -32,20 +37,16 @@ class Graph:
         min_distance = float("inf")
         closest_vertex = None
         for vertex_id, vertex in self.vertices.items():
-            distance = self.haversine(latitude, longitude, vertex.latitude, vertex.longitude)
+            distance = self.getDistance(latitude, longitude, vertex.latitude, vertex.longitude)
             if distance < min_distance:
                 min_distance = distance
                 closest_vertex = vertex_id
-        
-        #print('closest vertex', closest_vertex)
-        
         return int(closest_vertex) #vertex id of closest vertex
        
     def getWeight(self, source_id, destination_id, day_type, hour):
-        edge = self.edges.get(source_id,{}).get(destination_id)
+        edge = self.edges[source_id][destination_id]
         if edge:
             speed = edge.speeds[day_type][hour]
-            print(f"Edge from {source_id} to {destination_id}, Speed: {speed}, Length: {edge.length}")
             if speed > 0:
                 return edge.length / speed
         print(f"No valid edge or zero speed from {source_id} to {destination_id}")
@@ -63,9 +64,6 @@ class Graph:
             if current_vertex in visited:
                 continue
             visited.add(current_vertex)
-
-            if current_vertex == end_vertex_id:
-                return distances[end_vertex_id]
                         
             for neighbor in self.edges.get(current_vertex, {}):
                 if neighbor not in visited:
@@ -79,6 +77,10 @@ class Graph:
                         
                         distances[neighbor] = new_distance
                         heapq.heappush(pq, (new_distance, neighbor))
+
+                        if neighbor == end_vertex_id:
+                            print(distances[end_vertex_id])
+                            return distances[end_vertex_id]
 
         print(f"End vertex not reached: {end_vertex_id}, returning infinity")
         return float('infinity')
