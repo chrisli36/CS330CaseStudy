@@ -5,4 +5,4 @@ class Passenger:
         self.source_lon = source_lon
         self.dest_lat = dest_lat
         self.dest_lon = dest_lon
-        self.timeActive = 0
+        self.waitTime = 0

@@ -50,8 +50,12 @@ class Graph:
 
 
     def dijkstra(self, start_vertex_id, end_vertex_id, day_type, hour):
+        if start_vertex_id == end_vertex_id:
+            return 0.0
+
         distances = {vertex: float('inf') for vertex in self.vertices}
         distances[start_vertex_id] = 0
+
         pq = [(0, start_vertex_id)]
         visited = set()
 
@@ -64,19 +68,55 @@ class Graph:
             for neighbor in self.adjacency[current_vertex]:
                 if neighbor not in visited:
                     weight = self.getWeight(current_vertex, neighbor, day_type, hour)
+
                     new_distance = current_distance + weight
-                    
-                    #print(f"New Distance to {neighbor}: {new_distance}")
 
                     if new_distance < distances[neighbor]:
-                        #print(f"Updating {neighbor} in PQ")
-                        
                         distances[neighbor] = new_distance
                         heapq.heappush(pq, (new_distance, neighbor))
 
                         if neighbor == end_vertex_id:
-                            print(distances[end_vertex_id])
-                            return distances[end_vertex_id]
+                            return 3600 * distances[end_vertex_id]
 
-        print(f"End vertex not reached: {end_vertex_id}, returning infinity")
+        print(f"Could not find path from {start_vertex_id} to {end_vertex_id}, returning infinity")
+        return float('inf')
+    
+    def astar(self, start_vertex_id, end_vertex_id, day_type, hour):
+        if start_vertex_id == end_vertex_id:
+            return 0.0
+
+        distances = {vertex: float('inf') for vertex in self.vertices}
+        distances[start_vertex_id] = 0
+        # heuristicDistances = {vertex: float('inf') for vertex in self.vertices}
+        # heuristicDistances[start_vertex_id] = 0
+
+        pq = [(0, 0, start_vertex_id)]
+        visited = set()
+
+        tlat = self.vertices[end_vertex_id].latitude; tlon = self.vertices[end_vertex_id].longitude
+
+        while pq:
+            currHeuristicDistance, current_distance, current_vertex = heapq.heappop(pq)            
+            if current_vertex in visited:
+                continue
+            visited.add(current_vertex)
+                        
+            for neighbor in self.adjacency[current_vertex]:
+                if neighbor not in visited:
+                    weight = self.getWeight(current_vertex, neighbor, day_type, hour)
+
+                    slat = self.vertices[neighbor].latitude; slon = self.vertices[neighbor].longitude
+                    heuristic = 30 * self.getDistance(slat, slon, tlat, tlon)
+
+                    new_distance = current_distance + weight
+                    heuristicDistance = new_distance + heuristic
+
+                    if new_distance < distances[neighbor]:
+                        distances[neighbor] = new_distance
+                        heapq.heappush(pq, (heuristicDistance, new_distance, neighbor))
+
+                        if neighbor == end_vertex_id:
+                            return 3600 * distances[end_vertex_id]
+
+        print(f"Could not find path from {start_vertex_id} to {end_vertex_id}, returning infinity")
         return float('inf')

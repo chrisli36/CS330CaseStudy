@@ -20,10 +20,7 @@ def main():
         graph.addEdge(edge) 
     
     start = timeit.default_timer()
-    print("The start time is:", start)
-
-    print(drivers[0:10])
-    print(passengers[0:10])
+    print("\n" + "\\" * 30 + "\nSTARTING SIMULATION\n" + "\\" * 30)
 
     algorithm = T1()
     algorithm.runT1v2(graph, drivers, passengers)
