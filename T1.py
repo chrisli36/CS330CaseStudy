@@ -5,6 +5,28 @@ import math
 from datetime import datetime, timedelta
 import timeit
 from collections import deque
+from Graph import Graph
+
+# Whenever riders join the queue, they'll have a waiting time that starts ticking up. 
+# T1 asks that you make no optimizations on distance and simply only use FIFO operations 
+# as soon as drivers become available. 
+
+# Task 2: Suppose at some point in time you have more passengers arriving but all of 
+# your drivers are currently busy [indeed, you may need to use the graph to estimate
+# how long your drivers would be busy on a particular ride]. Then you cannot 
+# immediately match these drivers. The simple policy in T1 suggests, as a baseline, 
+# that whenever a driver becomes available again, you match them to whichever passenger 
+# has been waiting the longest.
+
+"""
+need:
+FIFO for passengers
+earliest available driver
+passenger wait time calculation
+trip time calculation    
+    
+"""
+
 
 # T1
 class T1:
@@ -12,43 +34,44 @@ class T1:
         # give id to driver to distinguish driver
         for i, driver in enumerate(drivers):
             driver['id'] = i
-
-        # track 
+            
         total_passenger_wait_time = 0
         total_driver_active_time = 0
         driver_active_times = {driver['id']: 0 for driver in drivers}
         
-        for passenger in passengers:
-            p_vertex = graph.closestVertex(passenger['source_lat'], passenger['source_lon'])
+        # add queue
+        waiting_passengers = deque(passengers)
+        
+        # loop until all passengers are served or no driver available
+        while waiting_passengers and drivers:
+            passenger = waiting_passengers.popleft()
+            p_vertex = graph.closestVertex(passenger['source_lat'], passenger['source_lom'])
             dropoff_vertex = graph.closestVertex(passenger['dest_lat'], passenger['dest_lon'])
 
             nearest_driver = None
-            min_distance = float('infinity')
             min_time_to_pickup = None
             
-
+            # earliest available driver
             for driver in drivers:
-                d_vertex = graph.closestVertex(driver['latitude'], driver['longitude'])
-                day_type = 'weekday' if (driver['datetime']).weekday() < 5 else 'weekend'
-                hour = driver['datetime'].hour
-
-                time_to_pickup = graph.dijkstra(d_vertex, p_vertex, day_type, hour)
-                time_to_dropoff = graph.dijkstra(p_vertex, dropoff_vertex, day_type, hour)
-                
-                #print(time_to_dropoff)
-                #print(time_to_pickup)
-
-                if time_to_pickup < min_distance:
-                    min_distance = time_to_pickup
-                    min_time_to_pickup = time_to_pickup
+                if not nearest_driver or driver['datetime'] < nearest_driver['datetime']:
                     nearest_driver = driver
+                    d_vertex = graph.closestVertex(driver['latitude'], driver['longitude'])
+                    day_type = 'weekday' if (driver['datetime']).weekday() < 5 else 'weekend'
+                    hour = driver['datetime'].hour
+                    
+                    min_time_to_pickup = graph.dijkstra(d_vertex, p_vertex, day_type, hour)
+                    
+                    #print(min_time_to_pickup)
 
             if nearest_driver:
-                passenger_wait_time = (passenger['datetime'] -nearest_driver['datetime']).total_seconds()
+                passenger_wait_time = (passenger['datetime'] - nearest_driver['datetime']).total_seconds()
                 total_passenger_wait_time += passenger_wait_time
+                
+                time_to_dropoff = graph.dijkstra(p_vertex, dropoff_vertex, day_type, hour)
 
                 trip_time = min_time_to_pickup + time_to_dropoff
                 total_driver_active_time += trip_time
+                print("trip time:", trip_time)
                 
                 # update active time with driver id
                 driver_active_times[nearest_driver['id']] += trip_time
@@ -64,8 +87,8 @@ class T1:
         total_passenger_wait_time /= 60  # Convert to minutes
         total_driver_active_time /= 60   # Convert to minutes
 
-        #print("Total Passenger Wait Time (D1):", total_passenger_wait_time, "minutes")
-        #print("Total Driver Active Time (D2):", total_driver_active_time, "minutes")
+        print("Total Passenger Wait Time (D1):", total_passenger_wait_time, "minutes")
+        print("Total Driver Active Time (D2):", total_driver_active_time, "minutes")
         
         
     
