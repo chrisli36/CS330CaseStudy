@@ -1,11 +1,8 @@
-import json
-import csv
 import heapq
 import math
 from datetime import datetime, timedelta
 import timeit
 from collections import deque
-from Graph import Graph
 
 # Whenever riders join the queue, they'll have a waiting time that starts ticking up. 
 # T1 asks that you make no optimizations on distance and simply only use FIFO operations 
