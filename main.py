@@ -13,7 +13,6 @@ def main():
     drivers = preprocessor.processDrivers('drivers.csv')
     passengers = preprocessor.processPassengers('passengers.csv')
 
-
     graph = Graph()
     for vertex in vertices:
         graph.addVertex(vertex)

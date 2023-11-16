@@ -5,17 +5,22 @@ from Vertex import Vertex
 from Edge import Edge
 
 class Preprocessing:
-    # Preprocessing
     def processNodes(self, fileName):
+        '''Returns a list of vertex objects'''
+
         with open(fileName, 'r') as file:
             node_data = json.load(file)
         vertices = []
         for node_id, coords in node_data.items():
             vertex = Vertex(int(node_id), float(coords['lat']), float(coords['lon']))
             vertices.append(vertex)
+        
+        print("Processed nodes!")
         return vertices
 
     def processEdges(self, fileName):
+        '''Returns a list of edge objects'''
+
         edges = []
         with open(fileName, newline='') as file:
             reader = csv.reader(file)
@@ -27,15 +32,15 @@ class Preprocessing:
                     'weekend': {hour: float(row[27 + hour]) for hour in range(24)}
                 }
                 edge = Edge(source, dest, length, speeds)
-                
-                #This seems fine
-                #print(f"Edge from {source} to {dest}, length: {length}, speeds: {speeds}")
-                
                 edges.append(edge)
+        
+        print("Processed edges!")
         return edges
 
 
     def processDrivers(self, fileName):
+        '''Returns a list of drivers where each driver is a dictionary {datetime, latitutde, longitude}'''
+
         drivers = []
         with open(fileName, newline='') as file:
             reader = csv.DictReader(file)
@@ -45,10 +50,13 @@ class Preprocessing:
                     'latitude': float(row['Source Lat']),
                     'longitude': float(row['Source Lon'])
                 })
-        #print(drivers[-1])
+
+        print("Processed drivers!")
         return drivers
 
     def processPassengers(self, fileName):
+        '''Returns a list of passengers where each passenger is a dictionary {datetime, source_lat, source_lon, dest_lat, dest_lon}'''
+
         passengers = []
         with open(fileName, newline='') as file:
             reader = csv.DictReader(file)
@@ -60,5 +68,6 @@ class Preprocessing:
                     'dest_lat': float(row['Dest Lat']),
                     'dest_lon': float(row['Dest Lon'])
                 })
-        #print(passengers)
+
+        print("Processed passengers!")
         return passengers
