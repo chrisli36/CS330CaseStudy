@@ -72,6 +72,8 @@ class T1:
                 trip_time = min_time_to_pickup + time_to_dropoff
                 total_driver_active_time += trip_time
                 print("trip time:", trip_time)
+                print("total drver active time", total_driver_active_time)
+                print("total passenger wait time", total_passenger_wait_time)
                 
                 # update active time with driver id
                 driver_active_times[nearest_driver['id']] += trip_time
