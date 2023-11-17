@@ -5,8 +5,8 @@ from Graph import Graph
 
 
 #boundary (x, y, width, height)
-# x = median(min(vertex.lon), max(vertex.lon))
-# y = median(min(vertex.lat), max(vertex.lon))
+# x = mean(min(vertex.lon), max(vertex.lon))
+# y = mean(min(vertex.lat), max(vertex.lon))
 # width = max(vertex.lon) - min(vertex.lon)
 # height = max(vertex.lat) - min(vertex.lat)
 
@@ -89,26 +89,8 @@ class QuadTree:
         # find closest vertex to the given latitude and longitutde
         while True:
             range_to_query = (lat - search_radius, lon - search_radius, search_radius *2, search_radius*2)
-            found_points = self.query(range(range_to_query))
+            found_points = self.query_range(range(range_to_query))
             
             if found_points:
                 return min(found_points, key=lambda p: Graph.getDistance(p.lat, p.lon, lat, lon))
             search_radius += increment
-
-"""       
-# Example usage
-boundary = (0, 0, 100, 100)  # x, y, width, height
-qt = QuadTree(boundary, 4)  # 4 points per quadrant
-
-# Insert some points
-qt.insert(QuadTreeNode(10, 20, "A"))
-qt.insert(QuadTreeNode(30, 40, "B"))
-qt.insert(QuadTreeNode(50, 60, "C"))
-
-# Query range
-range_to_query = (20, 30, 40, 40)  # x, y, width, height
-found_points = qt.query_range(range_to_query)
-
-for point in found_points:
-    print(f"Found point {point.id} at ({point.x}, {point.y})")
-"""

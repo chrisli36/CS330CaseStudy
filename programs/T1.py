@@ -3,7 +3,7 @@ import math
 import timeit
 from datetime import datetime, timedelta
 from collections import deque
-from quadtree import QuadTree
+from quadtree import QuadTree, QuadTreeNode
 from Graph import Graph
 
 # Whenever riders join the queue, they'll have a waiting time that starts ticking up. 
@@ -58,14 +58,43 @@ class T1:
 
             # t1 = timeit.default_timer()
             # calculate the closest vertices for the driver start, pickup, and dropoff
-            driverStart = graph.closestVertex(driver.latitude, driver.longitude)
-            passengerPickup = graph.closestVertex(passenger.source_lat, passenger.source_lon)
-            passengerDropoff = graph.closestVertex(passenger.dest_lat, passenger.dest_lon)
+            #driverStart = graph.closestVertex(driver.latitude, driver.longitude)
+            #passengerPickup = graph.closestVertex(passenger.source_lat, passenger.source_lon)
+            #passengerDropoff = graph.closestVertex(passenger.dest_lat, passenger.dest_lon)
             
-            #try quadtree 
-            driverStart = 
+            # try quadtree 
+            max_lat = 0
+            max_lon = 0
+            min_lat = float("inf")
+            min_lon = float("inf")
+            for vertex in vertices:
+                # find boundary
+                if vertex.latitude > max_lat:
+                    max_lat = vertex.latitude
+                if vertex.longitude > max_lon:
+                    max_lat = vertex.longitude
+                if vertex.latitude < min_lat:
+                    min_lat = vertex.latitude
+                if vertex.longitude < min_lon:
+                    min_lon = vertex.longitude
             
+            x = (min_lon + max_lon)/2
+            y = (min_lat + max_lat)/2
+            width = (min_lat + max_lat + 1)
+            height = (min_lon + max_lon + 1)
+            boundary = (x, y, width, height)
+            qt = QuadTree(boundary, 4)
             
+            # build tree
+            for vertex in vertices:
+                node = QuadTreeNode(vertex.latitude, vertex.longitude, vertex.id)
+                qt.insert(node)
+              
+            driverStart = QuadTree.find_closest(driver.latitude, driver.longitude, 0.01, 0.01)
+            passengerPickup = QuadTree.find_closest(passenger.source_lat, passenger.source_lon)
+            passengerDropoff = QuadTree.find_closest(passenger.dest_lat, passenger.dest_lon) 
+            
+            print("driver start", driverStart)
             
             # t2 = timeit.default_timer()
 
