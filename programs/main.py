@@ -1,7 +1,6 @@
 import timeit
 from T1 import T1
 from Preprocessing import Preprocessing
-from Graph import Graph
 
 def main():
 
