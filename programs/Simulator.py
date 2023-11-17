@@ -1,10 +1,6 @@
-import heapq
-import math
 import timeit
 from datetime import datetime, timedelta
-from collections import deque
-from Quadtree import QuadTree, QuadTreeNode
-from DriverPQ import DriverPQ
+from PassengerDriverSim import PassengerDriverSim
 from Graph import Graph
 
 # Whenever riders join the queue, they'll have a waiting time that starts ticking up. 
@@ -19,43 +15,14 @@ from Graph import Graph
 # has been waiting the longest.
 
 
+class Simulator:
+    def runT1(self, vertices, edges, drivers, passengers):
+        self.runGeneralSimulation()
 
-
-# T1
-class Algorithms:
     def runT1(self, vertices, edges, drivers, passengers):
         # create graph
-        graph = Graph()
-        for vertex in vertices:
-            graph.addVertex(vertex)
-        for edge in edges:
-            graph.addEdge(edge) 
-
-        matchMaker = DriverPQ(passengers, drivers)
-
-        # try quadtree 
-        max_lat = 0
-        max_lon = 0
-        min_lat = float("inf")
-        min_lon = float("inf")
-        for vertex in vertices:
-            # find boundary
-            if vertex.latitude > max_lat:
-                max_lat = vertex.latitude
-            if vertex.longitude > max_lon:
-                max_lat = vertex.longitude
-            if vertex.latitude < min_lat:
-                min_lat = vertex.latitude
-            if vertex.longitude < min_lon:
-                min_lon = vertex.longitude
-
-        boundary = (min_lat, min_lon, max_lat, max_lon)
-        qt = QuadTree(boundary, 2)
-        
-        # build tree
-        for vertex in vertices:
-            node = QuadTreeNode(vertex.latitude, vertex.longitude, vertex.id)
-            qt.insert(node)
+        graph = Graph(vertices, edges)
+        matchMaker = PassengerDriverSim(passengers, drivers)
         
         count = 0
         while matchMaker.hasPassengers():
@@ -67,20 +34,15 @@ class Algorithms:
 
             t1 = timeit.default_timer()
             # calculate the closest vertices for the driver start, pickup, and dropoff
-            # driverStart = graph.closestVertex(driver.latitude, driver.longitude)
-            # passengerPickup = graph.closestVertex(passenger.source_lat, passenger.source_lon)
-            # passengerDropoff = graph.closestVertex(passenger.dest_lat, passenger.dest_lon)
-            
-            driverStart = qt.find_closest(driver.latitude, driver.longitude)
-            passengerPickup = qt.find_closest(passenger.source_lat, passenger.source_lon)
-            passengerDropoff = qt.find_closest(passenger.dest_lat, passenger.dest_lon) 
+            driverStart = graph.find_closestQT(driver.latitude, driver.longitude)
+            passengerPickup = graph.find_closestQT(passenger.source_lat, passenger.source_lon)
+            passengerDropoff = graph.find_closestQT(passenger.dest_lat, passenger.dest_lon) 
             
             # print("driver start", driverStart)
             # print("passengerpickup", passengerPickup)
             # print("passengerdropoff", passengerDropoff)
          
             t2 = timeit.default_timer()
-
             # calculate the time to pickup in seconds and record the datetime of pickup
             dayType = 'weekday' if driver.datetime.weekday() < 5 else 'weekend'
             hour = driver.datetime.hour

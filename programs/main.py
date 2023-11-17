@@ -1,5 +1,5 @@
 import timeit
-from Algorithms import Algorithms
+from Simulator import Simulator
 from Preprocessing import Preprocessing
 
 def main():
@@ -15,8 +15,8 @@ def main():
     start = timeit.default_timer()
     print("\n" + "\\" * 30 + "\nSTARTING SIMULATION\n" + "\\" * 30)
 
-    algorithm = Algorithms()
-    algorithm.runT1(vertices, edges, drivers, passengers)
+    sim = Simulator()
+    sim.runT1(vertices, edges, drivers, passengers)
     print("Time taken: ", timeit.default_timer() - start)
 
 if __name__ == "__main__":

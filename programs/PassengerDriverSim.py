@@ -1,7 +1,7 @@
 from collections import deque
 import heapq
 
-class DriverPQ:
+class PassengerDriverSim:
     def __init__(self, passengers, drivers):
         self.STARTTIME = min(drivers[0].datetime, passengers[0].datetime)
         

@@ -1,19 +1,7 @@
-from datetime import datetime
-from Vertex import Vertex
-from Edge import Edge
-from Graph import Graph
 import math
-
-
-#boundary (x, y, width, height)
-# x = mean(min(vertex.lon), max(vertex.lon))
-# y = mean(min(vertex.lat), max(vertex.lon))
-# width = max(vertex.lon) - min(vertex.lon)
-# height = max(vertex.lat) - min(vertex.lat)
 
 # given point, traverse tree, return 1-4 point that fall within the rectangle of the tree
 # return point min distance
-
 
 class QuadTreeNode:
     def __init__(self, lat, lon, id):
@@ -96,6 +84,7 @@ class QuadTree:
                 return self.southwest.find_closest(lat, lon)
             elif self.southeast.in_boundary(lat, lon) and len(self.southeast.vertices) > 0:
                 return self.southeast.find_closest(lat, lon)
+        
         # fix this later it needs to iterate through children
         min_distance = float("inf"); closest_vertex = None
         for vertex in self.vertices:
@@ -105,48 +94,3 @@ class QuadTree:
                 min_distance = distance
                 closest_vertex = vertex.id
         return int(closest_vertex) #vertex id of closest vertex
-        
-                
-        
-
-"""    def point_in_range(self, point, range):
-        x, y, w, h = range
-        return x <= point.x < x + w and y <= point.y < y + h
-    """
-"""    def find_closest(self, lat, lon, search_radius = 0.01, increment=0.01):
-        # find closest vertex to the given latitude and longitutde
-        while True:
-            range_to_query = (lat - search_radius, lon - search_radius, search_radius *2, search_radius*2)
-            found_points = self.query_range(range_to_query)
-            
-            if found_points:
-                return min(found_points, key=lambda p: QuadTree.getDistance(p.lat, p.lon, lat, lon))
-            search_radius += increment
-"""
-
-
-"""    def query_range(self, range, found=None):
-        if found is None:
-            found = []
-
-        if not self.intersects_range(range):
-            return found
-
-        for point in self.vertices:
-            if self.point_in_range(point, range):
-                found.append(point)
-
-        if self.divided:
-            self.northwest.query_range(range, found)
-            self.northeast.query_range(range, found)
-            self.southwest.query_range(range, found)
-            self.southeast.query_range(range, found)
-
-        return found
-
-    def intersects_range(self, range):
-        x, y, w, h = self.boundary
-        rx, ry, rw, rh = range
-
-        return not (x + w < rx or x > rx + rw or y + h < ry or y > ry + rh)
-"""

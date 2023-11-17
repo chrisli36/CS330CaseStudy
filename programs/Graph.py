@@ -1,14 +1,32 @@
 import heapq
 import math
 from collections import defaultdict
+from Quadtree import QuadTree, QuadTreeNode
 
 # Graph Class
 class Graph:
-    def __init__(self):
+    def __init__(self, vertices, edges):
         self.vertices = {}
+        for vertex in vertices:
+            self.addVertex(vertex)
         self.edges = {}
+        for edge in edges:
+            self.addEdge(edge)
 
         self.adjacency = defaultdict(list)
+        self.initQuadTree(vertices)
+        
+    def initQuadTree(self, vertices):
+        # find the boundary
+        allLatitudes = [vertex.latitude for vertex in vertices]
+        allLongitudes = [vertex.longitude for vertex in vertices]
+        boundary = (min(allLatitudes), min(allLongitudes), max(allLatitudes), max(allLongitudes))
+        
+        # build tree
+        self.qt = QuadTree(boundary, 4)
+        for vertex in vertices:
+            node = QuadTreeNode(vertex.latitude, vertex.longitude, vertex.id)
+            self.qt.insert(node)
 
     def addVertex(self, vertex):
         self.vertices[vertex.id] = vertex
@@ -38,6 +56,9 @@ class Graph:
                 min_distance = distance
                 closest_vertex = vertex_id
         return int(closest_vertex) #vertex id of closest vertex
+    
+    def closestVertexQT(self, latitude, longitude):
+        return self.qt.find_closest(latitude, longitude)
        
     def getWeight(self, source_id, destination_id, day_type, hour):
         edge = self.edges[source_id][destination_id]
