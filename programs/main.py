@@ -13,17 +13,11 @@ def main():
     drivers = preprocessor.processDrivers('fulldataset/drivers.csv')
     passengers = preprocessor.processPassengers('fulldataset/passengers.csv')
 
-    graph = Graph()
-    for vertex in vertices:
-        graph.addVertex(vertex)
-    for edge in edges:
-        graph.addEdge(edge) 
-    
     start = timeit.default_timer()
     print("\n" + "\\" * 30 + "\nSTARTING SIMULATION\n" + "\\" * 30)
 
     algorithm = T1()
-    algorithm.runT1v2(graph, drivers, passengers)
+    algorithm.runT1v2(vertices, edges, drivers, passengers)
     print("Time taken: ", timeit.default_timer() - start)
 
 if __name__ == "__main__":
