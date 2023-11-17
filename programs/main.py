@@ -17,7 +17,7 @@ def main():
     print("\n" + "\\" * 30 + "\nSTARTING SIMULATION\n" + "\\" * 30)
 
     algorithm = T1()
-    algorithm.runT1v2(vertices, edges, drivers, passengers)
+    algorithm.runT1(vertices, edges, drivers, passengers)
     print("Time taken: ", timeit.default_timer() - start)
 
 if __name__ == "__main__":
