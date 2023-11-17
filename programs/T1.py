@@ -18,14 +18,7 @@ from Graph import Graph
 # that whenever a driver becomes available again, you match them to whichever passenger 
 # has been waiting the longest.
 
-"""
-need:
-FIFO for passengers
-earliest available driver
-passenger wait time calculation
-trip time calculation    
-    
-"""
+
 
 
 # T1
@@ -70,23 +63,42 @@ class T1:
             #     if vertex.longitude < min_lon:
             #         min_lon = vertex.longitude
             
+<<<<<<< Updated upstream
             # x = (min_lon + max_lon)/2
             # y = (min_lat + max_lat)/2
             # width = (min_lat + max_lat + 1)
             # height = (min_lon + max_lon + 1)
             # boundary = (x, y, width, height)
             # qt = QuadTree(boundary, 4)
+=======
+
+            boundary = (min_lat, min_lon, max_lat, max_lon)
+            qt = QuadTree(boundary, 4)
+            print(qt)
+            
+>>>>>>> Stashed changes
             
             # # build tree
             # for vertex in vertices:
             #     node = QuadTreeNode(vertex.latitude, vertex.longitude, vertex.id)
             #     qt.insert(node)
               
+<<<<<<< Updated upstream
             # driverStart = QuadTree.find_closest(driver.latitude, driver.longitude, 0.01, 0.01)
             # passengerPickup = QuadTree.find_closest(passenger.source_lat, passenger.source_lon)
             # passengerDropoff = QuadTree.find_closest(passenger.dest_lat, passenger.dest_lon) 
             
             # print("driver start", driverStart)
+=======
+            driverStart = qt.find_closest(driver.latitude, driver.longitude, 0.01, 0.01)
+            passengerPickup = qt.find_closest(passenger.source_lat, passenger.source_lon)
+            passengerDropoff = qt.find_closest(passenger.dest_lat, passenger.dest_lon) 
+            
+            print("driver start", driverStart)
+            print("passengerpickup", passengerPickup)
+            print("passengerdropoff", passengerDropoff)
+        
+>>>>>>> Stashed changes
             
             # t2 = timeit.default_timer()
 
