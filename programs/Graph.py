@@ -6,6 +6,8 @@ from Quadtree import QuadTree, QuadTreeNode
 # Graph Class
 class Graph:
     def __init__(self, vertices, edges):
+        self.adjacency = defaultdict(list)
+
         self.vertices = {}
         for vertex in vertices:
             self.addVertex(vertex)
@@ -13,14 +15,13 @@ class Graph:
         for edge in edges:
             self.addEdge(edge)
 
-        self.adjacency = defaultdict(list)
         self.initQuadTree(vertices)
         
     def initQuadTree(self, vertices):
         # find the boundary
         allLatitudes = [vertex.latitude for vertex in vertices]
         allLongitudes = [vertex.longitude for vertex in vertices]
-        boundary = (min(allLatitudes), min(allLongitudes), max(allLatitudes), max(allLongitudes))
+        boundary = (min(allLatitudes) - 1, min(allLongitudes) - 1, max(allLatitudes) + 1, max(allLongitudes) + 1)
         
         # build tree
         self.qt = QuadTree(boundary, 4)
@@ -58,7 +59,7 @@ class Graph:
         return int(closest_vertex) #vertex id of closest vertex
     
     def closestVertexQT(self, latitude, longitude):
-        return self.qt.find_closest(latitude, longitude)
+        return self.qt.findClosest(latitude, longitude)
        
     def getWeight(self, source_id, destination_id, day_type, hour):
         edge = self.edges[source_id][destination_id]

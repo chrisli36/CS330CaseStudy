@@ -34,9 +34,14 @@ class Simulator:
 
             t1 = timeit.default_timer()
             # calculate the closest vertices for the driver start, pickup, and dropoff
-            driverStart = graph.find_closestQT(driver.latitude, driver.longitude)
-            passengerPickup = graph.find_closestQT(passenger.source_lat, passenger.source_lon)
-            passengerDropoff = graph.find_closestQT(passenger.dest_lat, passenger.dest_lon) 
+            driverStart = graph.closestVertexQT(driver.latitude, driver.longitude)
+            passengerPickup = graph.closestVertexQT(passenger.source_lat, passenger.source_lon)
+            passengerDropoff = graph.closestVertexQT(passenger.dest_lat, passenger.dest_lon) 
+
+            driverStart2 = graph.closestVertex(driver.latitude, driver.longitude)
+            passengerPickup2 = graph.closestVertex(passenger.source_lat, passenger.source_lon)
+            passengerDropoff2 = graph.closestVertex(passenger.dest_lat, passenger.dest_lon) 
+            print(driverStart == driverStart2, passengerPickup == passengerPickup2, passengerDropoff == passengerDropoff2)
             
             # print("driver start", driverStart)
             # print("passengerpickup", passengerPickup)

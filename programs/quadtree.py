@@ -17,7 +17,7 @@ class QuadTree:
         self.divided = False
         
     def insert(self, vertex):
-        if not self.in_boundary(vertex.lat, vertex.lon):
+        if not self.inBoundary(vertex.lat, vertex.lon):
             return False
 
         if len(self.vertices) < self.capacity:
@@ -27,19 +27,14 @@ class QuadTree:
         if not self.divided:
             self.subdivide()
             
-        if self.northwest.insert(vertex):
-            return True
-        elif self.northeast.insert(vertex):
-            return True
-        elif self.southwest.insert(vertex):
-            return True
-        elif self.southeast.insert(vertex):
-            return True
-        
+        for quad in self.quads:
+            if quad.insert(vertex):
+                return True
+
         print("INSERT FAILED")
         return False
 
-    def in_boundary(self, lat, lon):
+    def inBoundary(self, lat, lon):
         min_lat, min_lon, max_lat, max_lon = self.boundary
         return min_lon <= lon <= max_lon and min_lat <= lat <= max_lat
 
@@ -48,25 +43,27 @@ class QuadTree:
         mid_lat = (min_lat + max_lat) / 2
         mid_lon = (min_lon + max_lon) / 2
 
-        self.northwest = QuadTree((min_lat, min_lon, mid_lat, mid_lon), self.capacity)
-        self.northeast = QuadTree((min_lat, mid_lon, mid_lat, max_lon), self.capacity)
-        self.southwest = QuadTree((mid_lat, min_lon, max_lat, mid_lon), self.capacity)
-        self.southeast = QuadTree((mid_lat, mid_lon, max_lat, max_lon), self.capacity)
+        northwest = QuadTree((min_lat, min_lon, mid_lat, mid_lon), self.capacity)
+        northeast = QuadTree((min_lat, mid_lon, mid_lat, max_lon), self.capacity)
+        southwest = QuadTree((mid_lat, min_lon, max_lat, mid_lon), self.capacity)
+        southeast = QuadTree((mid_lat, mid_lon, max_lat, max_lon), self.capacity)
+        self.quads = [northwest, northeast, southwest, southeast]
 
         self.divided = True
 
         for vertex in self.vertices:
-            if self.northwest.insert(vertex):
-                continue
-            elif self.northeast.insert(vertex):
-                continue
-            elif self.southwest.insert(vertex):
-                continue
-            elif self.southeast.insert(vertex):
-                continue
-            print("SOMETHING'S WRONG")
+            quadID = self.getQuadID(vertex.lat, vertex.lon, self.quads)
+            self.quads[quadID].insert(vertex)
 
-    def getDistance(self, lat1, lon1, lat2, lon2): # to calculate closestVertex
+    def getQuadID(self, lat, lon, quads):
+        for i, quad in enumerate(quads):
+            # print(quad.boundary)
+            if quad.inBoundary(lat, lon):
+                return i
+        print("Did not find a quad for {}, {}".format(lat, lon))
+        return None
+
+    def getDistance(self, lat1, lon1, lat2, lon2):
         R = 3959.87433   
         dLat = math.radians(lat2 - lat1)
         dLon = math.radians(lon2 - lon1)
@@ -74,23 +71,27 @@ class QuadTree:
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         return R * c
     
-    def find_closest(self, lat, lon):
+    def findClosest(self, lat, lon):
         if self.divided:
-            if self.northwest.in_boundary(lat, lon) and len(self.northwest.vertices) > 0:
-                return self.northwest.find_closest(lat, lon)
-            elif self.northeast.in_boundary(lat, lon) and len(self.northeast.vertices) > 0:
-                return self.northeast.find_closest(lat, lon)
-            elif self.southwest.in_boundary(lat, lon) and len(self.southwest.vertices) > 0:
-                return self.southwest.find_closest(lat, lon)
-            elif self.southeast.in_boundary(lat, lon) and len(self.southeast.vertices) > 0:
-                return self.southeast.find_closest(lat, lon)
+            quadID = self.getQuadID(lat, lon, self.quads)
+            quad = self.quads[quadID]
+            if quad.inBoundary(lat, lon) and len(quad.vertices) > 0:
+                return quad.findClosest(lat, lon)
+            return self.chooseClosest(lat, lon, self.getAllChildren())
+        return self.chooseClosest(lat, lon, self.vertices)
         
-        # fix this later it needs to iterate through children
+    def chooseClosest(self, lat, lon, vertices):
         min_distance = float("inf"); closest_vertex = None
-        for vertex in self.vertices:
+        for vertex in vertices:
             distance = self.getDistance(lat, lon, vertex.lat, vertex.lon)
             # print(distance)
             if distance < min_distance:
                 min_distance = distance
                 closest_vertex = vertex.id
         return int(closest_vertex) #vertex id of closest vertex
+                
+    def getAllChildren(self):
+        children = []
+        for quad in self.quads:
+            children.extend(quad.vertices)
+        return children
