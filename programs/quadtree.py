@@ -21,7 +21,6 @@ class QuadTreeNode:
         self.lon = lon
         self.id = id
 
-
 class QuadTree:
     def __init__(self, boundary, capacity):
         self.boundary = boundary #  boundary = (min_lat, min_lon, max_lat, max_lon)
@@ -36,19 +35,20 @@ class QuadTree:
         if len(self.vertices) < self.capacity:
             self.vertices.append(vertex)
             return True
-        else:
-            if not self.divided:
-                self.subdivide()
-
-            if self.northwest.insert(vertex):
-                return True
-            elif self.northeast.insert(vertex):
-                return True
-            elif self.southwest.insert(vertex):
-                return True
-            elif self.southeast.insert(vertex):
-                return True
-
+        
+        if not self.divided:
+            self.subdivide()
+            
+        if self.northwest.insert(vertex):
+            return True
+        elif self.northeast.insert(vertex):
+            return True
+        elif self.southwest.insert(vertex):
+            return True
+        elif self.southeast.insert(vertex):
+            return True
+        
+        print("INSERT FAILED")
         return False
 
     def in_boundary(self, lat, lon):
@@ -67,18 +67,52 @@ class QuadTree:
 
         self.divided = True
 
-    def getDistance(self, lat1, lon1, lat2, lon2): # to calculate closestVertex
-            R = 3959.87433   
-            dLat = math.radians(lat2 - lat1)
-            dLon = math.radians(lon2 - lon1)
-            a = math.sin(dLat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dLon / 2) ** 2
-            c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-            return R * c
+        for vertex in self.vertices:
+            if self.northwest.insert(vertex):
+                continue
+            elif self.northeast.insert(vertex):
+                continue
+            elif self.southwest.insert(vertex):
+                continue
+            elif self.southeast.insert(vertex):
+                continue
+            print("SOMETHING'S WRONG")
 
-    def point_in_range(self, point, range):
+    def getDistance(self, lat1, lon1, lat2, lon2): # to calculate closestVertex
+        R = 3959.87433   
+        dLat = math.radians(lat2 - lat1)
+        dLon = math.radians(lon2 - lon1)
+        a = math.sin(dLat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dLon / 2) ** 2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        return R * c
+    
+    def find_closest(self, lat, lon):
+        if self.divided:
+            if self.northwest.in_boundary(lat, lon) and len(self.northwest.vertices) > 0:
+                return self.northwest.find_closest(lat, lon)
+            elif self.northeast.in_boundary(lat, lon) and len(self.northeast.vertices) > 0:
+                return self.northeast.find_closest(lat, lon)
+            elif self.southwest.in_boundary(lat, lon) and len(self.southwest.vertices) > 0:
+                return self.southwest.find_closest(lat, lon)
+            elif self.southeast.in_boundary(lat, lon) and len(self.southeast.vertices) > 0:
+                return self.southeast.find_closest(lat, lon)
+        # fix this later it needs to iterate through children
+        min_distance = float("inf"); closest_vertex = None
+        for vertex in self.vertices:
+            distance = self.getDistance(lat, lon, vertex.lat, vertex.lon)
+            # print(distance)
+            if distance < min_distance:
+                min_distance = distance
+                closest_vertex = vertex.id
+        return int(closest_vertex) #vertex id of closest vertex
+        
+                
+        
+
+"""    def point_in_range(self, point, range):
         x, y, w, h = range
         return x <= point.x < x + w and y <= point.y < y + h
-    
+    """
 """    def find_closest(self, lat, lon, search_radius = 0.01, increment=0.01):
         # find closest vertex to the given latitude and longitutde
         while True:

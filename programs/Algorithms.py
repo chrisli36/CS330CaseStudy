@@ -3,7 +3,7 @@ import math
 import timeit
 from datetime import datetime, timedelta
 from collections import deque
-from quadtree import QuadTree, QuadTreeNode
+from Quadtree import QuadTree, QuadTreeNode
 from DriverPQ import DriverPQ
 from Graph import Graph
 
@@ -22,7 +22,7 @@ from Graph import Graph
 
 
 # T1
-class T1:
+class Algorithms:
     def runT1(self, vertices, edges, drivers, passengers):
         # create graph
         graph = Graph()
@@ -32,6 +32,30 @@ class T1:
             graph.addEdge(edge) 
 
         matchMaker = DriverPQ(passengers, drivers)
+
+        # try quadtree 
+        max_lat = 0
+        max_lon = 0
+        min_lat = float("inf")
+        min_lon = float("inf")
+        for vertex in vertices:
+            # find boundary
+            if vertex.latitude > max_lat:
+                max_lat = vertex.latitude
+            if vertex.longitude > max_lon:
+                max_lat = vertex.longitude
+            if vertex.latitude < min_lat:
+                min_lat = vertex.latitude
+            if vertex.longitude < min_lon:
+                min_lon = vertex.longitude
+
+        boundary = (min_lat, min_lon, max_lat, max_lon)
+        qt = QuadTree(boundary, 2)
+        
+        # build tree
+        for vertex in vertices:
+            node = QuadTreeNode(vertex.latitude, vertex.longitude, vertex.id)
+            qt.insert(node)
         
         count = 0
         while matchMaker.hasPassengers():
@@ -39,64 +63,37 @@ class T1:
             count += 1
             # print(activeDrivers[0], activeDrivers[1])
 
-            (passenger, (startTime, driver)) = matchMaker.getNextMatchT2()
+            (passenger, (startTime, driver)) = matchMaker.getNextMatchT1()
 
-            # t1 = timeit.default_timer()
+            t1 = timeit.default_timer()
             # calculate the closest vertices for the driver start, pickup, and dropoff
-            driverStart = graph.closestVertex(driver.latitude, driver.longitude)
-            passengerPickup = graph.closestVertex(passenger.source_lat, passenger.source_lon)
-            passengerDropoff = graph.closestVertex(passenger.dest_lat, passenger.dest_lon)
+            # driverStart = graph.closestVertex(driver.latitude, driver.longitude)
+            # passengerPickup = graph.closestVertex(passenger.source_lat, passenger.source_lon)
+            # passengerDropoff = graph.closestVertex(passenger.dest_lat, passenger.dest_lon)
             
-            # # try quadtree 
-            # max_lat = 0
-            # max_lon = 0
-            # min_lat = float("inf")
-            # min_lon = float("inf")
-            # for vertex in vertices:
-            #     # find boundary
-            #     if vertex.latitude > max_lat:
-            #         max_lat = vertex.latitude
-            #     if vertex.longitude > max_lon:
-            #         max_lat = vertex.longitude
-            #     if vertex.latitude < min_lat:
-            #         min_lat = vertex.latitude
-            #     if vertex.longitude < min_lon:
-            #         min_lon = vertex.longitude
-            
-
-            boundary = (min_lat, min_lon, max_lat, max_lon)
-            qt = QuadTree(boundary, 4)
-            print(qt)
-            
-            
-            # # build tree
-            # for vertex in vertices:
-            #     node = QuadTreeNode(vertex.latitude, vertex.longitude, vertex.id)
-            #     qt.insert(node)
-              
-            driverStart = qt.find_closest(driver.latitude, driver.longitude, 0.01, 0.01)
+            driverStart = qt.find_closest(driver.latitude, driver.longitude)
             passengerPickup = qt.find_closest(passenger.source_lat, passenger.source_lon)
             passengerDropoff = qt.find_closest(passenger.dest_lat, passenger.dest_lon) 
             
-            print("driver start", driverStart)
-            print("passengerpickup", passengerPickup)
-            print("passengerdropoff", passengerDropoff)
+            # print("driver start", driverStart)
+            # print("passengerpickup", passengerPickup)
+            # print("passengerdropoff", passengerDropoff)
          
-            # t2 = timeit.default_timer()
+            t2 = timeit.default_timer()
 
             # calculate the time to pickup in seconds and record the datetime of pickup
             dayType = 'weekday' if driver.datetime.weekday() < 5 else 'weekend'
             hour = driver.datetime.hour
             timeToPickup = graph.dijkstra(driverStart, passengerPickup, dayType, hour)
             pickupDatetime = driver.datetime + timedelta(seconds=timeToPickup)
-            # t3 = timeit.default_timer()
+            t3 = timeit.default_timer()
 
             # caluclate the time to dropoff in seconds and record the datetime of dropoff
             dayType = 'weekday' if pickupDatetime.weekday() < 5 else 'weekend'
             hour = pickupDatetime.hour
             timeToDropoff = graph.dijkstra(passengerPickup, passengerDropoff, dayType, hour)
             dropoffDatetime = pickupDatetime + timedelta(seconds=timeToDropoff)
-            # t4 = timeit.default_timer()
+            t4 = timeit.default_timer()
 
             # update passenger's total wait time as time it took for driver to become active + pickup + dropoff
             waitTimeForActiveDriver = max(0, (driver.datetime - passenger.datetime).total_seconds())
@@ -112,9 +109,9 @@ class T1:
             # add driver to pq only if not exiting
             if not driver.isExiting():
                 matchMaker.pushPQ(driver, startTime + thisRideDuration)
-            # t5 = timeit.default_timer()
+            t5 = timeit.default_timer()
 
-            # print(t2 - t1, t3 - t2, t4 - t3, t5 - t4)
+            print(t2 - t1, t3 - t2, t4 - t3, t5 - t4)
 
         avgWaitTime = matchMaker.getAvgWaitTime()
         avgRideProfit = matchMaker.getAvgRideProfit()
