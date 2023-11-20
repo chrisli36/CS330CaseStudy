@@ -16,10 +16,25 @@ from Graph import Graph
 
 
 class Simulator:
-    def runT1(self, vertices, edges, drivers, passengers):
-        self.runGeneralSimulation()
 
-    def runT1(self, vertices, edges, drivers, passengers):
+    def setProblem(self, version):
+        self.version = version
+
+    def getNextMatch(self, matchmaker, graph):
+        if self.version == "T1":
+            return matchmaker.getNextMatchT1()
+        elif self.version == "T2":
+            return matchmaker.getNextMatchT2(graph)
+        elif self.version == "T3":
+            return matchmaker.getNextMatchT3(graph)
+        elif self.version == "T4":
+            return matchmaker.getNextMatchT4()
+        elif self.version == "T5":
+            return matchmaker.getNextMatchT5()
+        print("Simulator does not contain version {}".format(self.version))
+        return False
+
+    def runSimulation(self, vertices, edges, drivers, passengers):
         # create graph
         graph = Graph(vertices, edges)
         matchMaker = PassengerDriverSim(passengers, drivers)
@@ -28,9 +43,9 @@ class Simulator:
         while matchMaker.hasPassengers():
             print(count)
             count += 1
-            # print(activeDrivers[0], activeDrivers[1])
 
-            (passenger, (startTime, driver)) = matchMaker.getNextMatchT1()
+            t0 = timeit.default_timer()
+            (startDatetime, passenger, driver) = self.getNextMatch(matchMaker, graph)
 
             t1 = timeit.default_timer()
             # calculate the closest vertices for the driver start, pickup, and dropoff
@@ -38,33 +53,20 @@ class Simulator:
             passengerPickup = graph.closestVertexQT(passenger.source_lat, passenger.source_lon)
             passengerDropoff = graph.closestVertexQT(passenger.dest_lat, passenger.dest_lon) 
 
-            driverStart2 = graph.closestVertex(driver.latitude, driver.longitude)
-            passengerPickup2 = graph.closestVertex(passenger.source_lat, passenger.source_lon)
-            passengerDropoff2 = graph.closestVertex(passenger.dest_lat, passenger.dest_lon) 
-            print(driverStart == driverStart2, passengerPickup == passengerPickup2, passengerDropoff == passengerDropoff2)
-            
-            # print("driver start", driverStart)
-            # print("passengerpickup", passengerPickup)
-            # print("passengerdropoff", passengerDropoff)
-         
             t2 = timeit.default_timer()
             # calculate the time to pickup in seconds and record the datetime of pickup
-            dayType = 'weekday' if driver.datetime.weekday() < 5 else 'weekend'
-            hour = driver.datetime.hour
-            timeToPickup = graph.dijkstra(driverStart, passengerPickup, dayType, hour)
+            timeToPickup = graph.dijkstra(driverStart, passengerPickup, startDatetime)
             pickupDatetime = driver.datetime + timedelta(seconds=timeToPickup)
+            
             t3 = timeit.default_timer()
-
             # caluclate the time to dropoff in seconds and record the datetime of dropoff
-            dayType = 'weekday' if pickupDatetime.weekday() < 5 else 'weekend'
-            hour = pickupDatetime.hour
-            timeToDropoff = graph.dijkstra(passengerPickup, passengerDropoff, dayType, hour)
+            timeToDropoff = graph.dijkstra(passengerPickup, passengerDropoff, pickupDatetime)
             dropoffDatetime = pickupDatetime + timedelta(seconds=timeToDropoff)
+            
             t4 = timeit.default_timer()
-
             # update passenger's total wait time as time it took for driver to become active + pickup + dropoff
-            waitTimeForActiveDriver = max(0, (driver.datetime - passenger.datetime).total_seconds())
-            passenger.waitTime = waitTimeForActiveDriver + timeToPickup + timeToDropoff
+            waitTimeToGetActiveDriver = max(0, (driver.datetime - passenger.datetime).total_seconds())
+            passenger.waitTime = waitTimeToGetActiveDriver + timeToPickup + timeToDropoff
 
             # update the driver's ride profit by adding (-timetoPickup + timeToDropoff)
             driver.rideProfit += timeToDropoff - timeToPickup
@@ -75,10 +77,10 @@ class Simulator:
             driver.datetime = dropoffDatetime
             # add driver to pq only if not exiting
             if not driver.isExiting():
-                matchMaker.pushPQ(driver, startTime + thisRideDuration)
+                matchMaker.pushPQ(driver, startDatetime + timedelta(seconds=thisRideDuration))
+            
             t5 = timeit.default_timer()
-
-            print(t2 - t1, t3 - t2, t4 - t3, t5 - t4)
+            print("match: {}, closest: {}, path1: {}, path2: {}, update: {}".format(t1 - t0, t2 - t1, t3 - t2, t4 - t3, t5-t4))
 
         avgWaitTime = matchMaker.getAvgWaitTime()
         avgRideProfit = matchMaker.getAvgRideProfit()

@@ -71,7 +71,11 @@ class Graph:
         return float('inf')
 
 
-    def dijkstra(self, start_vertex_id, end_vertex_id, day_type, hour):
+    def dijkstra(self, start_vertex_id, end_vertex_id, datetime):
+
+        day_type = 'weekday' if datetime.weekday() < 5 else 'weekend'
+        hour = datetime.hour
+
         if start_vertex_id == end_vertex_id:
             return 0.0
 
@@ -103,22 +107,23 @@ class Graph:
         print(f"Could not find path from {start_vertex_id} to {end_vertex_id}, returning infinity")
         return float('inf')
     
-    def astar(self, start_vertex_id, end_vertex_id, day_type, hour):
+    def astar(self, start_vertex_id, end_vertex_id, datetime):
+        day_type = 'weekday' if datetime.weekday() < 5 else 'weekend'
+        hour = datetime.hour
+
         if start_vertex_id == end_vertex_id:
             return 0.0
 
         distances = {vertex: float('inf') for vertex in self.vertices}
         distances[start_vertex_id] = 0
-        # heuristicDistances = {vertex: float('inf') for vertex in self.vertices}
-        # heuristicDistances[start_vertex_id] = 0
 
-        pq = [(0, 0, start_vertex_id)]
+        pq = [(0, start_vertex_id)]
         visited = set()
 
         tlat = self.vertices[end_vertex_id].latitude; tlon = self.vertices[end_vertex_id].longitude
 
         while pq:
-            currHeuristicDistance, current_distance, current_vertex = heapq.heappop(pq)            
+            _, current_vertex = heapq.heappop(pq)            
             if current_vertex in visited:
                 continue
             visited.add(current_vertex)
@@ -128,14 +133,14 @@ class Graph:
                     weight = self.getWeight(current_vertex, neighbor, day_type, hour)
 
                     slat = self.vertices[neighbor].latitude; slon = self.vertices[neighbor].longitude
-                    heuristic = 30 * self.getDistance(slat, slon, tlat, tlon)
+                    heuristic = 50 * self.getDistance(slat, slon, tlat, tlon)
 
-                    new_distance = current_distance + weight
+                    new_distance = distances[current_vertex] + weight
                     heuristicDistance = new_distance + heuristic
 
                     if new_distance < distances[neighbor]:
                         distances[neighbor] = new_distance
-                        heapq.heappush(pq, (heuristicDistance, new_distance, neighbor))
+                        heapq.heappush(pq, (heuristicDistance, neighbor))
 
                         if neighbor == end_vertex_id:
                             return 3600 * distances[end_vertex_id]
