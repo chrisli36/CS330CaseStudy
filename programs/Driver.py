@@ -10,4 +10,4 @@ class Driver:
         return (self.datetime - self.startTime).total_seconds() >= 28800
     
     def __lt__(self, other):
-        return self.rideProfit < other.rideProfit
+        return self.datetime < other.datetime
