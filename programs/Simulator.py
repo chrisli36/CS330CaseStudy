@@ -2,6 +2,7 @@ import timeit
 from datetime import datetime, timedelta
 from PassengerDriverSim import PassengerDriverSim
 from Graph import Graph
+import csv
 
 # Whenever riders join the queue, they'll have a waiting time that starts ticking up. 
 # T1 asks that you make no optimizations on distance and simply only use FIFO operations 
@@ -82,10 +83,16 @@ class Simulator:
             t5 = timeit.default_timer()
             print("match: {}, closest: {}, path1: {}, path2: {}, update: {}".format(t1 - t0, t2 - t1, t3 - t2, t4 - t3, t5-t4))
 
-        avgWaitTime = matchMaker.getAvgWaitTime()
-        avgRideProfit = matchMaker.getAvgRideProfit()
+        waitTimes = matchMaker.getAvgWaitTime()
+        rideProfits = matchMaker.getAvgRideProfit()
 
-        print("Average total wait time for passengers: {}".format(avgWaitTime))
-        print("Average ride profit for drivers: {}".format(avgRideProfit))
+
+        with open("{} results.csv".format(self.version), "w") as f:
+            write = csv.writer(f)
+            write.writerow(waitTimes)
+            write.writerow(rideProfits)
+
+        print("Average total wait time for passengers: {}".format(sum(waitTimes) / len(waitTimes)))
+        print("Average ride profit for drivers: {}".format(sum(rideProfits) / len(rideProfits)))
 
 

@@ -1,6 +1,5 @@
 from collections import deque
 import heapq
-from Graph import Graph
 from datetime import datetime, timedelta
 
 class PassengerDriverSim:
@@ -26,7 +25,7 @@ class PassengerDriverSim:
     def pushPQ(self, driver, newTime):
         heapq.heappush(self.activeDrivers, (newTime, driver))
 
-    def getNextMatchT1(self): # 73, 26
+    def getNextMatchT1(self): # 1830.398, 456.3268
         passengerDatetime, passenger = self.activePassengers.popleft()
         driverDatetime, driver = heapq.heappop(self.activeDrivers)
         return (max(passengerDatetime, driverDatetime), passenger, driver)
@@ -44,7 +43,7 @@ class PassengerDriverSim:
 
         return validDrivers
 
-    def getNextMatchT2(self, graph): # 65, 99
+    def getNextMatchT2(self, graph): # 1635.958, 1763.17
         passengerDatetime, passenger = self.activePassengers.popleft()
     
         validDrivers = self.getValidDrivers(passengerDatetime, self.activeDrivers)
@@ -63,7 +62,7 @@ class PassengerDriverSim:
         
         return (max(passengerDatetime, minDriverWrapper[0]), passenger, minDriverWrapper[1])
     
-    def getNextMatchT3(self, graph): # 64.876, 104.148
+    def getNextMatchT3(self, graph): # 1626.27, 1829.5189
         passengerDatetime, passenger = self.activePassengers.popleft()
         passengerPickup = graph.closestVertex(passenger.source_lat, passenger.source_lon)
 
@@ -85,7 +84,7 @@ class PassengerDriverSim:
         
         return (max(passengerDatetime, minDriverWrapper[0]), passenger, minDriverWrapper[1])
     
-    def getNextMatchT5(self, graph):
+    def getNextMatchT5(self, graph): # 1488.33, 2131.128
         additionalTime = 300
 
         passengerDatetime, passenger = self.activePassengers.popleft()
@@ -112,19 +111,17 @@ class PassengerDriverSim:
         return (max(passengerDatetime, minDriverWrapper[0]), passenger, minDriverWrapper[1])
 
     def getAvgWaitTime(self):
-        totalWaitTime = 0; count = 0
+        waitTimes = []
         for passenger in self.passengers:
             if passenger.waitTime > 0:
-                totalWaitTime += passenger.waitTime
-                count += 1
-        return totalWaitTime / count
+                waitTimes.append(passenger.waitTime)
+        return waitTimes
 
     def getAvgRideProfit(self):
-        totalRideProfit = 0; count = 0
+        rideProfits = []
         for driver in self.drivers:
             if driver.rideProfit != 0:
-                totalRideProfit += driver.rideProfit
-                count += 1
-        return totalRideProfit / count
+                rideProfits.append(driver.rideProfit)
+        return rideProfits
 
         
