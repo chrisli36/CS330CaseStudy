@@ -21,7 +21,7 @@ class Graph:
         # find the boundary
         allLatitudes = [vertex.latitude for vertex in vertices]
         allLongitudes = [vertex.longitude for vertex in vertices]
-        boundary = (min(allLatitudes) - 1, min(allLongitudes) - 1, max(allLatitudes) + 1, max(allLongitudes) + 1)
+        boundary = (min(allLatitudes) - 2, min(allLongitudes) - 2, max(allLatitudes) + 2, max(allLongitudes) + 2)
         
         # build tree
         self.qt = QuadTree(boundary, 4)
@@ -90,7 +90,7 @@ class Graph:
             if current_vertex in visited:
                 continue
             visited.add(current_vertex)
-                        
+            
             for neighbor in self.adjacency[current_vertex]:
                 if neighbor not in visited:
                     weight = self.getWeight(current_vertex, neighbor, day_type, hour)

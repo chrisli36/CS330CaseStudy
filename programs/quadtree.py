@@ -11,6 +11,8 @@ class QuadTreeNode:
 
 class QuadTree:
     def __init__(self, boundary, capacity):
+        self.SMALLNUM = 2.2250738585072014e-308
+
         self.boundary = boundary #  boundary = (min_lat, min_lon, max_lat, max_lon)
         self.capacity = capacity
         self.vertices = []
@@ -72,23 +74,46 @@ class QuadTree:
         return R * c
     
     def findClosest(self, lat, lon):
+        middleClosest, boundary = self.findClosestSubfunction(lat, lon)
+
+        minX = boundary[0] - self.SMALLNUM
+        midX = (boundary[0] + boundary[2]) / 2.0
+        maxX = boundary[2] + self.SMALLNUM
+
+        minY = boundary[1] - self.SMALLNUM
+        midY = (boundary[1] + boundary[3]) / 2.0
+        maxY = boundary[3] + self.SMALLNUM
+        
+        topLeft, _ = self.findClosestSubfunction(minX, minY)
+        left, _ = self.findClosestSubfunction(minX, midY)
+        bottomLeft, _ = self.findClosestSubfunction(minX, maxY)
+        bottom, _ = self.findClosestSubfunction(midX, maxY)
+        bottomRight, _ = self.findClosestSubfunction(maxX, maxY)
+        right, _ = self.findClosestSubfunction(maxX, midY)
+        topRight, _ = self.findClosestSubfunction(maxX, minY)
+        top, _ = self.findClosestSubfunction(midX, minY)
+
+        choices = [middleClosest, topLeft, left, bottomLeft, bottom, bottomRight, right, topRight, top]
+        closestVertex = self.chooseClosest(lat, lon, choices)
+        return int(closestVertex.id)
+        
+    def findClosestSubfunction(self, lat, lon):
         if self.divided:
             quadID = self.getQuadID(lat, lon, self.quads)
             quad = self.quads[quadID]
             if quad.inBoundary(lat, lon) and len(quad.vertices) > 0:
-                return quad.findClosest(lat, lon)
-            return self.chooseClosest(lat, lon, self.getAllChildren())
-        return self.chooseClosest(lat, lon, self.vertices)
+                return quad.findClosestSubfunction(lat, lon)
+            return (self.chooseClosest(lat, lon, self.getAllChildren()), self.boundary)
+        return (self.chooseClosest(lat, lon, self.vertices), self.boundary)
         
     def chooseClosest(self, lat, lon, vertices):
         min_distance = float("inf"); closest_vertex = None
         for vertex in vertices:
             distance = self.getDistance(lat, lon, vertex.lat, vertex.lon)
-            # print(distance)
             if distance < min_distance:
                 min_distance = distance
-                closest_vertex = vertex.id
-        return int(closest_vertex) #vertex id of closest vertex
+                closest_vertex = vertex
+        return closest_vertex
                 
     def getAllChildren(self):
         children = []

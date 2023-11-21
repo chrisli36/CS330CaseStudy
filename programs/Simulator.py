@@ -40,7 +40,7 @@ class Simulator:
         matchMaker = PassengerDriverSim(passengers, drivers)
         
         count = 0
-        while matchMaker.hasPassengers():
+        while matchMaker.hasPassengers() and count < 200:
             print(count)
             count += 1
 
@@ -52,6 +52,11 @@ class Simulator:
             driverStart = graph.closestVertexQT(driver.latitude, driver.longitude)
             passengerPickup = graph.closestVertexQT(passenger.source_lat, passenger.source_lon)
             passengerDropoff = graph.closestVertexQT(passenger.dest_lat, passenger.dest_lon) 
+            
+            # driverStart2 = graph.closestVertex(driver.latitude, driver.longitude)
+            # passengerPickup2 = graph.closestVertex(passenger.source_lat, passenger.source_lon)
+            # passengerDropoff2 = graph.closestVertex(passenger.dest_lat, passenger.dest_lon) 
+            # print(driverStart == driverStart2, passengerPickup == passengerPickup2, passengerDropoff == passengerDropoff2)
 
             t2 = timeit.default_timer()
             # calculate the time to pickup in seconds and record the datetime of pickup
@@ -67,7 +72,6 @@ class Simulator:
             # update passenger's total wait time as time it took for driver to become active + pickup + dropoff
             waitTimeToGetActiveDriver = max(0, (driver.datetime - passenger.datetime).total_seconds())
             passenger.waitTime = waitTimeToGetActiveDriver + timeToPickup + timeToDropoff
-
             # update the driver's ride profit by adding (-timetoPickup + timeToDropoff)
             driver.rideProfit += timeToDropoff - timeToPickup
             # update the driver's timeActive by adding (timetoPickup + timeToDropoff)
@@ -75,6 +79,9 @@ class Simulator:
             driver.timeActive += thisRideDuration
             # update the driver's datetime
             driver.datetime = dropoffDatetime
+            # update the driver's location
+            driver.lat = passenger.dest_lat
+            driver.lon = passenger.dest_lon
             # add driver to pq only if not exiting
             if not driver.isExiting():
                 matchMaker.pushPQ(driver, startDatetime + timedelta(seconds=thisRideDuration))
