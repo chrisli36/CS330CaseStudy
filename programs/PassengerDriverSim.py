@@ -1,16 +1,14 @@
 from collections import deque
 import heapq
 from Graph import Graph
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class PassengerDriverSim:
     def __init__(self, passengers, drivers):
-        # self.STARTTIME = min(drivers[0].datetime, passengers[0].datetime)
-        
+
         self.passengers = passengers
         self.activePassengers = []
         for passenger in self.passengers:
-            # wrapper = ((passenger.datetime - self.STARTTIME).total_seconds(), passenger)
             wrapper = (passenger.datetime, passenger)
             self.activePassengers.append(wrapper)
         self.activePassengers = deque(self.activePassengers)
@@ -18,7 +16,6 @@ class PassengerDriverSim:
         self.drivers = drivers
         self.activeDrivers = []
         for driver in self.drivers:
-            # wrapper = ((driver.datetime - self.STARTTIME).total_seconds(), driver)
             wrapper = (driver.datetime, driver)
             self.activeDrivers.append(wrapper)
         heapq.heapify(self.activeDrivers)
@@ -34,19 +31,24 @@ class PassengerDriverSim:
         driverDatetime, driver = heapq.heappop(self.activeDrivers)
         return (max(passengerDatetime, driverDatetime), passenger, driver)
     
-    def getNextMatchT2(self, graph): # 69, 60
-        passengerDatetime, passenger = self.activePassengers.popleft()
-        
+    def getValidDrivers(self, passengerDatetime, activeDrivers):
         driverDatetime, driver = (datetime.min, None)
         validDrivers = []
-        while driverDatetime <= passengerDatetime and self.activeDrivers:
-            driverDatetime, driver = heapq.heappop(self.activeDrivers)
+        while driverDatetime <= passengerDatetime and activeDrivers:
+            driverDatetime, driver = heapq.heappop(activeDrivers)
             validDrivers.append((driverDatetime, driver))
-        
+
         if len(validDrivers) > 1:
-            heapq.heappush(self.activeDrivers, validDrivers[-1])
+            heapq.heappush(activeDrivers, validDrivers[-1])
             validDrivers.pop()
-        
+
+        return validDrivers
+
+    def getNextMatchT2(self, graph): # 65, 99
+        passengerDatetime, passenger = self.activePassengers.popleft()
+    
+        validDrivers = self.getValidDrivers(passengerDatetime, self.activeDrivers)
+
         driverDatetime, driver = validDrivers[0]
         minDistance = graph.getDistance(passenger.source_lat, passenger.source_lon, driver.latitude, driver.longitude)
         minDriverWrapper = (driverDatetime, driver)
@@ -55,51 +57,74 @@ class PassengerDriverSim:
             if distance < minDistance:
                 heapq.heappush(self.activeDrivers, minDriverWrapper)
                 minDriverWrapper = (driverDatetime, driver)
+                minDistance = distance
             else:
                 heapq.heappush(self.activeDrivers, (driverDatetime, driver))
         
         return (max(passengerDatetime, minDriverWrapper[0]), passenger, minDriverWrapper[1])
     
-    def getNextMatchT3(self, graph): # 69, 58
+    def getNextMatchT3(self, graph): # 64.876, 104.148
         passengerDatetime, passenger = self.activePassengers.popleft()
+        passengerPickup = graph.closestVertex(passenger.source_lat, passenger.source_lon)
+
+        validDrivers = self.getValidDrivers(passengerDatetime, self.activeDrivers)
+        
+        driverDatetime, driver = validDrivers[0]
+        driverStart = graph.closestVertex(driver.latitude, driver.longitude)
+        minTime = graph.dijkstra(passengerPickup, driverStart, max(driver.datetime, passengerDatetime))
+        minDriverWrapper = (driverDatetime, driver)
+        for driverDatetime, driver in validDrivers[1:]:
+            driverStart = graph.closestVertex(driver.latitude, driver.longitude)
+            time = graph.dijkstra(passengerPickup, driverStart, max(driver.datetime, passengerDatetime))
+            if time < minTime:
+                heapq.heappush(self.activeDrivers, minDriverWrapper)
+                minDriverWrapper = (driverDatetime, driver)
+                minTime = time
+            else:
+                heapq.heappush(self.activeDrivers, (driverDatetime, driver))
+        
+        return (max(passengerDatetime, minDriverWrapper[0]), passenger, minDriverWrapper[1])
+    
+    def getNextMatchT5(self, graph):
+        additionalTime = 300
+
+        passengerDatetime, passenger = self.activePassengers.popleft()
+        passenger.datetime += timedelta(seconds=additionalTime)
+        passengerDatetime = passenger.datetime
+        passenger.waitTime += additionalTime
         passengerPickup = graph.closestVertexQT(passenger.source_lat, passenger.source_lon)
+        validDrivers = self.getValidDrivers(passengerDatetime, self.activeDrivers)
         
-        driverDatetime, driver = (datetime.min, None)
-        validDrivers = []
-        while driverDatetime <= passengerDatetime and self.activeDrivers:
-            driverDatetime, driver = heapq.heappop(self.activeDrivers)
-            validDrivers.append((driverDatetime, driver))
-        
-        if len(validDrivers) > 1:
-            heapq.heappush(self.activeDrivers, validDrivers[-1])
-            validDrivers.pop()
-        
-        print(len(validDrivers))
         driverDatetime, driver = validDrivers[0]
         driverStart = graph.closestVertexQT(driver.latitude, driver.longitude)
-        minDistance = graph.dijkstra(passengerPickup, driverStart, max(driver.datetime, passengerDatetime))
+        minTime = graph.dijkstra(passengerPickup, driverStart, max(driver.datetime, passengerDatetime))
         minDriverWrapper = (driverDatetime, driver)
         for driverDatetime, driver in validDrivers[1:]:
             driverStart = graph.closestVertexQT(driver.latitude, driver.longitude)
-            distance = graph.dijkstra(passengerPickup, driverStart, max(driver.datetime, passengerDatetime))
-            if distance < minDistance:
+            time = graph.dijkstra(passengerPickup, driverStart, max(driver.datetime, passengerDatetime))
+            if time < minTime:
                 heapq.heappush(self.activeDrivers, minDriverWrapper)
                 minDriverWrapper = (driverDatetime, driver)
+                minTime = time
             else:
                 heapq.heappush(self.activeDrivers, (driverDatetime, driver))
         
         return (max(passengerDatetime, minDriverWrapper[0]), passenger, minDriverWrapper[1])
-    
+
     def getAvgWaitTime(self):
-        totalWaitTime = 0
+        totalWaitTime = 0; count = 0
         for passenger in self.passengers:
-            totalWaitTime += passenger.waitTime
-        return totalWaitTime / len(self.passengers)
+            if passenger.waitTime > 0:
+                totalWaitTime += passenger.waitTime
+                count += 1
+        return totalWaitTime / count
 
     def getAvgRideProfit(self):
-        totalRideProfit = 0
+        totalRideProfit = 0; count = 0
         for driver in self.drivers:
-            totalRideProfit += driver.rideProfit
-        return totalRideProfit / len(self.drivers)
+            if driver.rideProfit != 0:
+                totalRideProfit += driver.rideProfit
+                count += 1
+        return totalRideProfit / count
 
         

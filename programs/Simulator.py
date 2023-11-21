@@ -27,10 +27,8 @@ class Simulator:
             return matchmaker.getNextMatchT2(graph)
         elif self.version == "T3":
             return matchmaker.getNextMatchT3(graph)
-        elif self.version == "T4":
-            return matchmaker.getNextMatchT4()
         elif self.version == "T5":
-            return matchmaker.getNextMatchT5()
+            return matchmaker.getNextMatchT5(graph)
         print("Simulator does not contain version {}".format(self.version))
         return False
 
@@ -53,11 +51,6 @@ class Simulator:
             passengerPickup = graph.closestVertexQT(passenger.source_lat, passenger.source_lon)
             passengerDropoff = graph.closestVertexQT(passenger.dest_lat, passenger.dest_lon) 
             
-            # driverStart2 = graph.closestVertex(driver.latitude, driver.longitude)
-            # passengerPickup2 = graph.closestVertex(passenger.source_lat, passenger.source_lon)
-            # passengerDropoff2 = graph.closestVertex(passenger.dest_lat, passenger.dest_lon) 
-            # print(driverStart == driverStart2, passengerPickup == passengerPickup2, passengerDropoff == passengerDropoff2)
-
             t2 = timeit.default_timer()
             # calculate the time to pickup in seconds and record the datetime of pickup
             timeToPickup = graph.dijkstra(driverStart, passengerPickup, startDatetime)

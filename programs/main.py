@@ -16,7 +16,7 @@ def main():
     print("\n" + "\\" * 30 + "\nSTARTING SIMULATION\n" + "\\" * 30)
 
     sim = Simulator()
-    sim.setProblem("T1")
+    sim.setProblem("T5")
     sim.runSimulation(vertices, edges, drivers, passengers)
 
     print("Time taken: ", timeit.default_timer() - start)
