@@ -55,7 +55,7 @@ class Simulator:
             t2 = timeit.default_timer()
             # calculate the time to pickup in seconds and record the datetime of pickup
             timeToPickup = graph.dijkstra(driverStart, passengerPickup, startDatetime)
-            pickupDatetime = driver.datetime + timedelta(seconds=timeToPickup)
+            pickupDatetime = startDatetime + timedelta(seconds=timeToPickup)
             
             t3 = timeit.default_timer()
             # caluclate the time to dropoff in seconds and record the datetime of dropoff
@@ -68,9 +68,6 @@ class Simulator:
             passenger.waitTime = waitTimeToGetActiveDriver + timeToPickup + timeToDropoff
             # update the driver's ride profit by adding (-timetoPickup + timeToDropoff)
             driver.rideProfit += timeToDropoff - timeToPickup
-            # update the driver's timeActive by adding (timetoPickup + timeToDropoff)
-            thisRideDuration = timeToDropoff + timeToPickup
-            driver.timeActive += thisRideDuration
             # update the driver's datetime
             driver.datetime = dropoffDatetime
             # update the driver's location
@@ -78,7 +75,7 @@ class Simulator:
             driver.lon = passenger.dest_lon
             # add driver to pq only if not exiting
             if not driver.isExiting():
-                matchMaker.pushPQ(driver, startDatetime + timedelta(seconds=thisRideDuration))
+                matchMaker.pushPQ(driver, dropoffDatetime)
             
             t5 = timeit.default_timer()
             print("match: {}, closest: {}, path1: {}, path2: {}, update: {}".format(t1 - t0, t2 - t1, t3 - t2, t4 - t3, t5-t4))

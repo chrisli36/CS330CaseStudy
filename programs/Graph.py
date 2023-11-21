@@ -70,7 +70,6 @@ class Graph:
         print(f"No valid edge or zero speed from {source_id} to {destination_id}")
         return float('inf')
 
-
     def dijkstra(self, start_vertex_id, end_vertex_id, datetime):
 
         day_type = 'weekday' if datetime.weekday() < 5 else 'weekend'
@@ -147,3 +146,12 @@ class Graph:
 
         print(f"Could not find path from {start_vertex_id} to {end_vertex_id}, returning infinity")
         return float('inf')
+    
+    # def runFloydWarshall(self):
+    #     graph = [[float("inf") for _ in range(len(self.vertices))]]
+
+    #     dist = list(map(lambda i: list(map(lambda j: j, i)), graph))
+    #     for k in range():
+    #         for i in range(V):
+    #             for j in range(V):
+    #                 dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
