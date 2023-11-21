@@ -64,16 +64,16 @@ class PassengerDriverSim:
     
     def getNextMatchT3(self, graph): # 1626.27, 1829.5189
         passengerDatetime, passenger = self.activePassengers.popleft()
-        passengerPickup = graph.closestVertex(passenger.source_lat, passenger.source_lon)
+        passengerPickup = graph.closestVertexQT(passenger.source_lat, passenger.source_lon)
 
         validDrivers = self.getValidDrivers(passengerDatetime, self.activeDrivers)
         
         driverDatetime, driver = validDrivers[0]
-        driverStart = graph.closestVertex(driver.latitude, driver.longitude)
+        driverStart = graph.closestVertexQT(driver.latitude, driver.longitude)
         minTime = graph.dijkstra(passengerPickup, driverStart, max(driver.datetime, passengerDatetime))
         minDriverWrapper = (driverDatetime, driver)
         for driverDatetime, driver in validDrivers[1:]:
-            driverStart = graph.closestVertex(driver.latitude, driver.longitude)
+            driverStart = graph.closestVertexQT(driver.latitude, driver.longitude)
             time = graph.dijkstra(passengerPickup, driverStart, max(driver.datetime, passengerDatetime))
             if time < minTime:
                 heapq.heappush(self.activeDrivers, minDriverWrapper)
