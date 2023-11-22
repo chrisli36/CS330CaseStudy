@@ -63,27 +63,12 @@ class Simulator:
             t2 = timeit.default_timer()
             # calculate the time to pickup in seconds and record the datetime of pickup
             timeToPickup = graph.astar(driverStart, passengerPickup, startDatetime)
-            # d = graph.getDistance(graph.vertices[driverStart].lat, 
-            #                       graph.vertices[driverStart].lon, 
-            #                       graph.vertices[passengerPickup].lat, 
-            #                       graph.vertices[passengerPickup].lon)
-            # print(timeToPickup / d / 3600)
-            # timeToPickup2 = graph.astar(driverStart, passengerPickup, startDatetime)
-            # print(timeToPickup - timeToPickup2)
             pickupDatetime = startDatetime + timedelta(seconds=timeToPickup)
             
             t3 = timeit.default_timer()
-            # caluclate the time to dropoff in seconds and record the datetime of dropoff
+            # calculate the time to dropoff in seconds and record the datetime of dropoff
             timeToDropoff = graph.astar(passengerPickup, passengerDropoff, pickupDatetime)
             dropoffDatetime = pickupDatetime + timedelta(seconds=timeToDropoff)
-            
-            t34 = timeit.default_timer()
-            # caluclate the time to dropoff in seconds and record the datetime of dropoff
-            timeToDropoff = graph.dijkstra(passengerPickup, passengerDropoff, pickupDatetime)
-            
-            t4 = timeit.default_timer()
-
-            print((t4 - t34) / (t34 - t3))
 
             # update passenger's total wait time as time it took for driver to become active + pickup + dropoff
             waitTimeToGetActiveDriver = max(0, (driver.datetime - passenger.datetime).total_seconds())
