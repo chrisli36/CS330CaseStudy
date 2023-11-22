@@ -97,12 +97,13 @@ class Simulator:
                 print(driver.ridesTaken, driver.datetime - driver.startTime)
             
             t5 = timeit.default_timer()
-            print("Passenger {} | match: {}, closest: {}, path1: {}, path2: {}, update: {}".format(count, 
+            print("Runtime: passenger {} | match: {}, closest: {}, path1: {}, path2: {}, update: {}".format(count, 
                                                                                                     self.roundSignificantDigits(t1 - t0, 5), 
                                                                                                     self.roundSignificantDigits(t2 - t1, 5), 
                                                                                                     self.roundSignificantDigits(t3 - t2, 5), 
                                                                                                     self.roundSignificantDigits(t4 - t3, 5), 
                                                                                                     self.roundSignificantDigits(t5 - t4, 5)))
+            print("Passenger wait time was {} seconds: {}s for match, {}s for pickup, {}s for dropoff".format(passenger.waitTime, waitTimeToGetActiveDriver, timeToPickup, timeToDropoff))
 
         waitTimes = matchMaker.getAvgWaitTime()
         rideProfits = matchMaker.getAvgRideProfit()

@@ -27,7 +27,7 @@ class PassengerDriverSim:
 
     # Average total wait time for 5002 matched passengers: 2496.980017601332
     # Average ride profit for drivers: 70.89003320595775
-    # Total time taken: 633.0489675829886
+    # Total time taken: 616.1893742089742
     def getNextMatchT1(self):
         # get next passenger off the queue
         passengerDatetime, passenger = self.activePassengers.popleft()
@@ -51,9 +51,9 @@ class PassengerDriverSim:
         print("\tFound {} valid driver(s)".format(len(validDrivers)))
         return validDrivers
 
-    # Average total wait time for 5002 matched passengers: 6348.380214744399
-    # Average ride profit for drivers: 1054.5683325810223
-    # Total time taken: 618.8783476250246
+    # Average total wait time for 5002 matched passengers: 1522.9153580149323
+    # Average ride profit for drivers: 3429.237838884721
+    # Total time taken: 477.7813972089789
     def getNextMatchT2(self, graph):
         # get next passenger off the queue
         passengerDatetime, passenger = self.activePassengers.popleft()
@@ -75,6 +75,7 @@ class PassengerDriverSim:
                 heapq.heappush(self.activeDrivers, (driverDatetime, driver))
         
         return (max(passengerDatetime, minDriverWrapper[0]), passenger, minDriverWrapper[1])
+    
     
     def getNextMatchT3(self, graph):
         # get next passenger off the queue
@@ -170,5 +171,3 @@ class PassengerDriverSim:
             if driver.rideProfit != 0:
                 rideProfits.append(driver.rideProfit)
         return rideProfits
-
-        
