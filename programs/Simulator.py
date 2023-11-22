@@ -69,7 +69,8 @@ class Simulator:
             # calculate the time to dropoff in seconds and record the datetime of dropoff
             timeToDropoff = graph.astar(passengerPickup, passengerDropoff, pickupDatetime)
             dropoffDatetime = pickupDatetime + timedelta(seconds=timeToDropoff)
-
+            
+            t4 = timeit.default_timer()
             # update passenger's total wait time as time it took for driver to become active + pickup + dropoff
             waitTimeToGetActiveDriver = max(0, (driver.datetime - passenger.datetime).total_seconds())
             passenger.waitTime = waitTimeToGetActiveDriver + timeToPickup + timeToDropoff
