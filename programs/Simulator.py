@@ -40,22 +40,25 @@ class Simulator:
         return round(num, numSignficant - int(math.floor(math.log10(abs(num)))) - 1)
 
     def runSimulation(self, vertices, edges, drivers, passengers):
+        print("Running for problem {}".format(self.version))
+
         # create graph
         graph = Graph(vertices, edges)
         matchMaker = PassengerDriverSim(passengers, drivers)
         
         count = 0
-        while matchMaker.hasPassengers():
+        while matchMaker.hasPassengers(): # and count < 200:
             count += 1
 
             t0 = timeit.default_timer()
+            # get the next passenger-driver match
             (startDatetime, passenger, driver) = self.getNextMatch(matchMaker, graph)
 
             t1 = timeit.default_timer()
             # calculate the closest vertices for the driver start, pickup, and dropoff
-            driverStart = graph.closestVertex(driver.latitude, driver.longitude)
-            passengerPickup = graph.closestVertex(passenger.source_lat, passenger.source_lon)
-            passengerDropoff = graph.closestVertex(passenger.dest_lat, passenger.dest_lon) 
+            driverStart = graph.closestVertex(driver.lat, driver.lon)
+            passengerPickup = graph.closestVertex(passenger.slat, passenger.slon)
+            passengerDropoff = graph.closestVertex(passenger.dlat, passenger.dlon) 
             
             t2 = timeit.default_timer()
             # calculate the time to pickup in seconds and record the datetime of pickup
@@ -83,13 +86,15 @@ class Simulator:
             # update the driver's datetime
             driver.datetime = dropoffDatetime
             # update the driver's location
-            driver.lat = passenger.dest_lat
-            driver.lon = passenger.dest_lon
+            driver.lat = passenger.dlat
+            driver.lon = passenger.dlon
             # update the driver's rides taken
             driver.ridesTaken += 1
             # add driver to pq only if not exiting
             if not driver.isExiting():
                 matchMaker.pushPQ(driver, dropoffDatetime)
+            else:
+                print(driver.ridesTaken, driver.datetime - driver.startTime)
             
             t5 = timeit.default_timer()
             print("Passenger {} | match: {}, closest: {}, path1: {}, path2: {}, update: {}".format(count, 

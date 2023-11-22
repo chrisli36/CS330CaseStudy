@@ -13,7 +13,6 @@ class Graph:
         self.V = len(self.vertices)
 
         self.edges = defaultdict(dict)
-        # self.adjacency = defaultdict(dict)
         for edge in edges:
             self.addEdge(edge)
 
@@ -31,8 +30,6 @@ class Graph:
         edge.dest = self.oldToNew[edge.dest]
 
         self.edges[edge.source][edge.dest] = edge
-        # self.adjacency[edge.source][](edge.dest)
-        # self.adjacency[edge.dest].append(edge.source)
         
     def initQuadTree(self, vertices):
         # find the boundary
@@ -67,8 +64,6 @@ class Graph:
         return self.qt.findClosest(lat, lon)
        
     def getWeight(self, sourceID, destID, day_type, hour):
-        # print(self.edges[sourceID])
-        # print(sourceID, destID)
         edge = self.edges[sourceID][destID]
         if edge:
             speed = edge.speeds[day_type][hour]

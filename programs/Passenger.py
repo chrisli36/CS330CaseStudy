@@ -1,8 +1,8 @@
 class Passenger:
-    def __init__(self, datetime, source_lat, source_lon, dest_lat, dest_lon):
+    def __init__(self, datetime, slat, slon, dlat, dlon):
         self.datetime = datetime
-        self.source_lat = source_lat
-        self.source_lon = source_lon
-        self.dest_lat = dest_lat
-        self.dest_lon = dest_lon
+        self.slat = slat
+        self.slon = slon
+        self.dlat = dlat
+        self.dlon = dlon
         self.waitTime = 0
