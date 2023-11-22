@@ -47,7 +47,7 @@ class Simulator:
         matchMaker = PassengerDriverSim(passengers, drivers)
         
         count = 0
-        while matchMaker.hasPassengers(): # and count < 200:
+        while matchMaker.hasPassengers() and count < 1000:
             count += 1
 
             t0 = timeit.default_timer()

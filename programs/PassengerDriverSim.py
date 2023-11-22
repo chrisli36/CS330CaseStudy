@@ -148,7 +148,7 @@ class PassengerDriverSim:
         minDriverWrapper = (driverDatetime, driver)
         for driverDatetime, driver in validDrivers[1:]:
             driverStart = graph.closestVertexQT(driver.lat, driver.lon)
-            time = graph.dijkstra(passengerPickup, driverStart, max(driver.datetime, passengerDatetime))
+            time = graph.astar(passengerPickup, driverStart, max(driver.datetime, passengerDatetime))
             if time < minTime:
                 heapq.heappush(self.activeDrivers, minDriverWrapper)
                 minDriverWrapper = (driverDatetime, driver)
