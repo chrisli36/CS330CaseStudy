@@ -1,6 +1,6 @@
 # Vertex Class
 class Vertex:
-    def __init__(self, id, latitude, longitude):
+    def __init__(self, id, lat, lon):
         self.id = id
-        self.latitude = latitude
-        self.longitude = longitude
+        self.lat = lat
+        self.lon = lon

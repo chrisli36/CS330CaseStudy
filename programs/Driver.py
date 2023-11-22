@@ -5,9 +5,10 @@ class Driver:
         self.latitude = latitude
         self.longitude = longitude
         self.rideProfit = 0
+        self.ridesTaken = 0
 
     def isExiting(self):
-        return (self.datetime - self.startTime).total_seconds() >= 28800
+        return (self.datetime - self.startTime).total_seconds() >= 14400 and self.ridesTaken > 4
     
     def __lt__(self, other):
         return self.datetime < other.datetime

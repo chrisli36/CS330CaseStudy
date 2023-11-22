@@ -6,39 +6,45 @@ from Quadtree import QuadTree, QuadTreeNode
 # Graph Class
 class Graph:
     def __init__(self, vertices, edges):
-        self.adjacency = defaultdict(list)
-
-        self.vertices = {}
+        self.vertices = []
+        self.oldToNew = {}
         for vertex in vertices:
             self.addVertex(vertex)
-        self.edges = {}
+        self.V = len(self.vertices)
+
+        self.edges = defaultdict(dict)
+        # self.adjacency = defaultdict(dict)
         for edge in edges:
             self.addEdge(edge)
 
         self.initQuadTree(vertices)
+
+    def addVertex(self, vertex):
+        newID = len(self.vertices)
+
+        self.oldToNew[vertex.id] = newID
+        vertex.id = newID
+        self.vertices.append(vertex)
+
+    def addEdge(self, edge):
+        edge.source = self.oldToNew[edge.source]
+        edge.dest = self.oldToNew[edge.dest]
+
+        self.edges[edge.source][edge.dest] = edge
+        # self.adjacency[edge.source][](edge.dest)
+        # self.adjacency[edge.dest].append(edge.source)
         
     def initQuadTree(self, vertices):
         # find the boundary
-        allLatitudes = [vertex.latitude for vertex in vertices]
-        allLongitudes = [vertex.longitude for vertex in vertices]
+        allLatitudes = [vertex.lat for vertex in vertices]
+        allLongitudes = [vertex.lon for vertex in vertices]
         boundary = (min(allLatitudes) - 2, min(allLongitudes) - 2, max(allLatitudes) + 2, max(allLongitudes) + 2)
         
         # build tree
         self.qt = QuadTree(boundary, 4)
         for vertex in vertices:
-            node = QuadTreeNode(vertex.latitude, vertex.longitude, vertex.id)
+            node = QuadTreeNode(vertex.lat, vertex.lon, vertex.id)
             self.qt.insert(node)
-
-    def addVertex(self, vertex):
-        self.vertices[vertex.id] = vertex
-
-    def addEdge(self, edge):
-        if edge.source not in self.edges:
-            self.edges[edge.source] = {}
-        self.edges[edge.source][edge.destination] = edge
-
-        self.adjacency[edge.source].append(edge.destination)
-        self.adjacency[edge.destination].append(edge.source)
     
     def getDistance(self, lat1, lon1, lat2, lon2): # to calculate closestVertex
         R = 3959.87433   
@@ -48,110 +54,126 @@ class Graph:
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         return R * c
     
-    def closestVertex(self, latitude, longitude):
-        min_distance = float("inf")
-        closest_vertex = None
-        for vertex_id, vertex in self.vertices.items():
-            distance = self.getDistance(latitude, longitude, vertex.latitude, vertex.longitude)
-            if distance < min_distance:
-                min_distance = distance
-                closest_vertex = vertex_id
-        return int(closest_vertex) #vertex id of closest vertex
+    def closestVertex(self, lat, lon):
+        minDistance = float("inf"); closestID = None
+        for id, vertex in enumerate(self.vertices):
+            distance = self.getDistance(lat, lon, vertex.lat, vertex.lon)
+            if distance < minDistance:
+                minDistance = distance
+                closestID = id
+        return int(closestID) # vertex id of closest vertex
     
-    def closestVertexQT(self, latitude, longitude):
-        return self.qt.findClosest(latitude, longitude)
+    def closestVertexQT(self, lat, lon):
+        return self.qt.findClosest(lat, lon)
        
-    def getWeight(self, source_id, destination_id, day_type, hour):
-        edge = self.edges[source_id][destination_id]
+    def getWeight(self, sourceID, destID, day_type, hour):
+        # print(self.edges[sourceID])
+        # print(sourceID, destID)
+        edge = self.edges[sourceID][destID]
         if edge:
             speed = edge.speeds[day_type][hour]
             if speed > 0:
                 return edge.length / speed
-        print(f"No valid edge or zero speed from {source_id} to {destination_id}")
+        print(f"No valid edge or zero speed from {sourceID} to {destID}")
         return float('inf')
 
-    def dijkstra(self, start_vertex_id, end_vertex_id, datetime):
+    def dijkstra(self, startID, endID, datetime):
+        if startID == endID:
+            return 0.0
 
         day_type = 'weekday' if datetime.weekday() < 5 else 'weekend'
         hour = datetime.hour
 
-        if start_vertex_id == end_vertex_id:
-            return 0.0
-
-        distances = {vertex: float('inf') for vertex in self.vertices}
-        distances[start_vertex_id] = 0
-
-        pq = [(0, start_vertex_id)]
+        times = [float('inf')] * self.V; times[startID] = 0
+        pq = [(0, startID)]
         visited = set()
-
         while pq:
-            current_distance, current_vertex = heapq.heappop(pq)            
-            if current_vertex in visited:
+            currDistance, currVertex = heapq.heappop(pq)
+            if currVertex in visited:
                 continue
-            visited.add(current_vertex)
+            visited.add(currVertex)
             
-            for neighbor in self.adjacency[current_vertex]:
+            for neighbor, _ in self.edges[currVertex].items():
                 if neighbor not in visited:
-                    weight = self.getWeight(current_vertex, neighbor, day_type, hour)
+                    weight = self.getWeight(currVertex, neighbor, day_type, hour)
 
-                    new_distance = current_distance + weight
+                    newTime = currDistance + weight
+                    if newTime < times[neighbor]:
+                        times[neighbor] = newTime
+                        heapq.heappush(pq, (newTime, neighbor))
 
-                    if new_distance < distances[neighbor]:
-                        distances[neighbor] = new_distance
-                        heapq.heappush(pq, (new_distance, neighbor))
+                        if neighbor == endID:
+                            return 3600 * times[endID]
 
-                        if neighbor == end_vertex_id:
-                            return 3600 * distances[end_vertex_id]
-
-        print(f"Could not find path from {start_vertex_id} to {end_vertex_id}, returning infinity")
+        print(f"Could not find path from {startID} to {endID}, returning infinity")
         return float('inf')
     
-    def astar(self, start_vertex_id, end_vertex_id, datetime):
+    def astar(self, startID, endID, datetime):
+        if startID == endID:
+            return 0.0
+        
         day_type = 'weekday' if datetime.weekday() < 5 else 'weekend'
         hour = datetime.hour
 
-        if start_vertex_id == end_vertex_id:
-            return 0.0
-
-        distances = {vertex: float('inf') for vertex in self.vertices}
-        distances[start_vertex_id] = 0
-
-        pq = [(0, start_vertex_id)]
+        times = [float('inf')] * self.V; times[startID] = 0
+        pq = [(0, startID)]
         visited = set()
-
-        tlat = self.vertices[end_vertex_id].latitude; tlon = self.vertices[end_vertex_id].longitude
-
+        tlat = self.vertices[endID].lat; tlon = self.vertices[endID].lon
         while pq:
-            _, current_vertex = heapq.heappop(pq)            
-            if current_vertex in visited:
+            _, currVertex = heapq.heappop(pq)            
+            if currVertex in visited:
                 continue
-            visited.add(current_vertex)
+            visited.add(currVertex)
                         
-            for neighbor in self.adjacency[current_vertex]:
+            for neighbor, _ in self.edges[currVertex].items():
                 if neighbor not in visited:
-                    weight = self.getWeight(current_vertex, neighbor, day_type, hour)
+                    weight = self.getWeight(currVertex, neighbor, day_type, hour)
 
-                    slat = self.vertices[neighbor].latitude; slon = self.vertices[neighbor].longitude
-                    heuristic = 50 * self.getDistance(slat, slon, tlat, tlon)
+                    slat = self.vertices[neighbor].lat; slon = self.vertices[neighbor].lon
+                    distHeuristic = 0.04 * self.getDistance(slat, slon, tlat, tlon)
 
-                    new_distance = distances[current_vertex] + weight
-                    heuristicDistance = new_distance + heuristic
+                    newTime = times[currVertex] + weight
+                    heuristicDistance = newTime + distHeuristic
 
-                    if new_distance < distances[neighbor]:
-                        distances[neighbor] = new_distance
+                    # print(distHeuristic, newTime)
+
+                    if newTime < times[neighbor]:
+                        times[neighbor] = newTime
                         heapq.heappush(pq, (heuristicDistance, neighbor))
 
-                        if neighbor == end_vertex_id:
-                            return 3600 * distances[end_vertex_id]
+                        if neighbor == endID:
+                            return 3600 * times[endID]
 
-        print(f"Could not find path from {start_vertex_id} to {end_vertex_id}, returning infinity")
+        print(f"Could not find path from {startID} to {endID}, returning infinity")
         return float('inf')
     
-    # def runFloydWarshall(self):
-    #     graph = [[float("inf") for _ in range(len(self.vertices))]]
+    def getAverageWeight(self, edge):
+        times = []
+        for dayType in ['weekday', 'weekend']:
+            for hour in range(24):
+                time = edge.speeds[dayType][hour]
+                times.append(time)
+        return sum(times) / len(times)
 
-    #     dist = list(map(lambda i: list(map(lambda j: j, i)), graph))
-    #     for k in range():
-    #         for i in range(V):
-    #             for j in range(V):
-    #                 dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
+    def runFloydWarshall(self):
+        print("Running Floyd-Warshall preprocessing!")
+        graph = []
+        for i in range(self.V):
+            print("\titeration {}".format(i))
+            graph.append([float("inf")] * self.V)
+        print("Finished initializing infinities")
+        for u, vs in self.edges.items():
+            for v, edge in vs.items():
+                graph[u][v] = self.getAverageWeight(edge)
+        print("Finished initializing graph")
+
+        times = list(map(lambda i: list(map(lambda j: j, i)), graph))
+        for k in range(self.V):
+            print("\titeration {}".format(k))
+            for i in range(self.V):
+                for j in range(self.V):
+                    times[i][j] = min(times[i][j], times[i][k] + times[k][j])
+        self.estimatedTimes = times
+    
+    def floydWarshall(self, startID, endID):
+        return self.estimatedTimes[startID][endID]
