@@ -51,9 +51,9 @@ class PassengerDriverSim:
         print("\tFound {} valid driver(s)".format(len(validDrivers)))
         return validDrivers
 
-    # Average total wait time for 5002 matched passengers: 1522.9153580149323
-    # Average ride profit for drivers: 3429.237838884721
-    # Total time taken: 477.7813972089789
+    # Average total wait time for 1000 matched passengers: 2288.333497471102
+    # Average ride profit for drivers: 2217.453189945262
+    # Total time taken: 100.44720312498976
     def getNextMatchT2(self, graph):
         # get next passenger off the queue
         passengerDatetime, passenger = self.activePassengers.popleft()
@@ -76,7 +76,9 @@ class PassengerDriverSim:
         
         return (max(passengerDatetime, minDriverWrapper[0]), passenger, minDriverWrapper[1])
     
-    
+    # Average total wait time for 1000 matched passengers: 2196.5878792073195
+    # Average ride profit for drivers: 2605.800296663021
+    # Total time taken: 709.8873388330103
     def getNextMatchT3(self, graph):
         # get next passenger off the queue
         passengerDatetime, passenger = self.activePassengers.popleft()
@@ -102,6 +104,9 @@ class PassengerDriverSim:
         
         return (max(passengerDatetime, minDriverWrapper[0]), passenger, minDriverWrapper[1])
     
+    # Average total wait time for 1000 matched passengers: 2083.294767278543
+    # Average ride profit for drivers: 2769.717069254036
+    # Total time taken: 211.37234150001314
     def getNextMatchT4(self, graph):
         # get next passenger off the queue
         passengerDatetime, passenger = self.activePassengers.popleft()
@@ -127,6 +132,9 @@ class PassengerDriverSim:
         
         return (max(passengerDatetime, minDriverWrapper[0]), passenger, minDriverWrapper[1])
     
+    # Average total wait time for 1000 matched passengers: 1954.3478816970232
+    # Average ride profit for drivers: 2805.9488713720175
+    # Total time taken: 203.0963418330066
     def getNextMatchT5(self, graph):
         # get next passenger off the queue
         passengerDatetime, passenger = self.activePassengers.popleft()
